@@ -84,6 +84,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus
+ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,6 +117,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/Zc:__cplusplus
+ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,13 +145,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AppTime.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="EngineRenderer.cpp" />
+    <ClCompile Include="FpsTool.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MouseInput.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppTime.h" />
+    <ClInclude Include="Debug.h" />
+    <ClInclude Include="EngineRenderer.h" />
+    <ClInclude Include="FpsTool.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="KeyboardInput.h" />
+    <ClInclude Include="I_Lifecycle.h" />
+    <ClInclude Include="MouseInput.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
