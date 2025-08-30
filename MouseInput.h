@@ -3,12 +3,12 @@
 #include <GLFW/glfw3.h>
 #include <array>
 
+#include "EventBus.h"
+#include "SystemEvents.h"
+
 class MouseInput {
 public:
-    void init();
     ~MouseInput();
-
-    void attachToWindow(GLFWwindow* window);
 
     bool isButtonDown(int button) const;
     bool isButtonPressed(int button) const;
@@ -25,6 +25,10 @@ private:
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void scrollCallback(GLFWwindow* window, double offsetx, double offsety);
 
+	EventBus::ListenerId cursorPosListenerID = 0;
+    EventBus::ListenerId mouseButtonListenerID = 0;
+    EventBus::ListenerId scrollListenerID = 0;
+
     void handleCursorPos(double xpos, double ypos);
     void handleMouseButton(int button, int action, int mods);
     void handleScroll(double offsetx, double offsety);
@@ -39,6 +43,8 @@ private:
     double scrollX = 0.0;
     double scrollY = 0.0;
 
+    void init();
     void update(); // call after glfwPollEvents()
+	void destroy();
 	friend class Input;
 };

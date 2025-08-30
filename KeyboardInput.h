@@ -5,11 +5,13 @@
 #include <array>
 #include <memory>
 
+#include "EventBus.h"
+#include "SystemEvents.h"
+
 class TextInputContext; // forward declaration
 
 class KeyboardInput {
 public:
-    void init();
     ~KeyboardInput();
 
     bool isKeyDown(int key) const;
@@ -26,11 +28,10 @@ public:
     void setInputContext(TextInputContext* context) { textInputContext = context; }
     TextInputContext* getTextInputContext() const { return textInputContext; }
 
-    void attachToWindow(GLFWwindow* window);
-
 private:
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     void handleKey(int key, int scancode, int action, int mods);
+
+	EventBus::ListenerId keyDownListenerID = 0;
 
     std::array<bool, GLFW_KEY_LAST> keyDown{};
     std::array<bool, GLFW_KEY_LAST> keyPressed{};
@@ -48,6 +49,8 @@ private:
 
     TextInputContext* textInputContext = nullptr;
 
+    void init();
     void update(); // call after glfwPollEvents()
+    void destroy();
 	friend class Input;
 };

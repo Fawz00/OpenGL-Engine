@@ -99,5 +99,11 @@
     <ClInclude Include="AppTime.h">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="EventBus.h">
+      <Filter>Source Files\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemEvents.h">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

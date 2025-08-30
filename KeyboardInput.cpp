@@ -1,26 +1,22 @@
 #include "KeyboardInput.h"
+#include "Debug.h"
 
 void KeyboardInput::init() {
     keyDown.fill(false);
     keyPressed.fill(false);
     keyHold.fill(false);
     keyReleased.fill(false);
+
+    keyDownListenerID = EventBus::subscribe<KeyEvent>([this](const KeyEvent& e) {
+		handleKey(e.key, e.scancode, e.action, e.mods);
+	});
+}
+
+void KeyboardInput::destroy() {
+    EventBus::unsubscribe<KeyEvent>(keyDownListenerID);
 }
 
 KeyboardInput::~KeyboardInput() {
-    // nothing to free, GLFW handles callback automatically
-}
-
-void KeyboardInput::attachToWindow(GLFWwindow* window) {
-    glfwSetWindowUserPointer(window, this);
-    glfwSetKeyCallback(window, KeyboardInput::keyCallback);
-}
-
-void KeyboardInput::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    auto* self = static_cast<KeyboardInput*>(glfwGetWindowUserPointer(window));
-    if (self) {
-        self->handleKey(key, scancode, action, mods);
-    }
 }
 
 void KeyboardInput::handleKey(int key, int scancode, int action, int mods) {
@@ -38,7 +34,7 @@ void KeyboardInput::handleKey(int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
         keyDown[key] = true;
         keyReleased[key] = false;
-        keyHold[key] = true;
+        keyHold[key] = false;
         keyPressed[key] = true;
     }
     else if (action == GLFW_RELEASE) {

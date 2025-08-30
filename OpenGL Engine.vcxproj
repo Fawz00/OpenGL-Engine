@@ -161,6 +161,7 @@
     <ClInclude Include="AppTime.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="EngineRenderer.h" />
+    <ClInclude Include="EventBus.h" />
     <ClInclude Include="FpsTool.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="KeyboardInput.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="SystemEvents.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

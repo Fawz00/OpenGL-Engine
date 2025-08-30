@@ -1,11 +1,16 @@
 #include "Input.h"
 
-void Input::attachToWindow(GLFWwindow* window) {
-	keyboard.attachToWindow(window);
-	mouse.attachToWindow(window);
+void Input::init() {
+	keyboard.init();
+	mouse.init();
 }
 
 void Input::update() {
 	keyboard.update();
 	mouse.update();
+}
+
+void Input::destroy() {
+	keyboard.destroy();
+	mouse.destroy();
 }

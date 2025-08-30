@@ -18,7 +18,7 @@ int main()
     if (!glfwInit()) return -1;
 
     // Try to load custom cursor
-    GLFWcursor* cursor = Window::loadCursor("Resources/engine/textures/cursor.png", 0, 0);
+    GLFWcursor* cursor = Window::loadCursor("Resources/engine/textures/cursor.png", 0, 1);
     if (cursor) {
         glfwSetCursor(Window::getGLFWwindow(), cursor);
     }
@@ -27,7 +27,7 @@ int main()
     }
 
     // Attach input handlers
-    Input::attachToWindow(Window::getGLFWwindow());
+	Input::init();
 
 	// Initialize renderer
 	EngineRenderer::onInit();
@@ -35,13 +35,19 @@ int main()
     // Main loop
     while (!Window::shouldClose()) {
 		Window::poolEvent();
-        Input::update();
 
         // Call glViewport once per resize:
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());
             Window::setResized(false);
         }
+
+        if (Input::keyboard.isKeyPressed(GLFW_KEY_F11)) {
+            Window::toggleFullscreen();
+		}
+        if (Input::keyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
+            Window::setShouldClose(true);
+		}
 
         // Example clear
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -50,10 +56,12 @@ int main()
 		EngineRenderer::onUpdate(AppTime::getCurrentDeltaTime());
 
         Window::drawFrame();
+        Input::update();
         AppTime::update();
         FpsTool::endFrame();
     }
 
+	Input::destroy();
     Window::destroy();
     return 0;
 }

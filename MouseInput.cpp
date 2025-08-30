@@ -4,17 +4,25 @@ void MouseInput::init() {
     buttonDown.fill(false);
     buttonPressed.fill(false);
     buttonReleased.fill(false);
+
+    cursorPosListenerID = EventBus::subscribe<CursorPosEvent>([this](const CursorPosEvent& e) {
+        handleCursorPos(e.xpos, e.ypos);
+	});
+    mouseButtonListenerID = EventBus::subscribe<MouseButtonEvent>([this](const MouseButtonEvent& e) {
+        handleMouseButton(e.button, e.action, e.mods);
+    });
+    scrollListenerID = EventBus::subscribe<MouseScrollEvent>([this](const MouseScrollEvent& e) {
+        handleScroll(e.offsetx, e.offsety);
+	});
+}
+
+void MouseInput::destroy() {
+    EventBus::unsubscribe<CursorPosEvent>(cursorPosListenerID);
+    EventBus::unsubscribe<MouseButtonEvent>(mouseButtonListenerID);
+    EventBus::unsubscribe<MouseScrollEvent>(scrollListenerID);
 }
 
 MouseInput::~MouseInput() {
-    // GLFW handles cleanup for callbacks
-}
-
-void MouseInput::attachToWindow(GLFWwindow* window) {
-    glfwSetWindowUserPointer(window, this);
-    glfwSetCursorPosCallback(window, MouseInput::cursorPosCallback);
-    glfwSetMouseButtonCallback(window, MouseInput::mouseButtonCallback);
-    glfwSetScrollCallback(window, MouseInput::scrollCallback);
 }
 
 void MouseInput::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
