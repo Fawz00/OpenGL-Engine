@@ -1,9 +1,10 @@
 #include "EngineRenderer.h"
 
-const float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+float vertices[] = {
+    // positions         // colors
+     0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
 };
 unsigned int VBO;
 unsigned int VAO;
@@ -19,10 +20,14 @@ void EngineRenderer::onInit() {
 
     shader = new Shader("Resources/engine/shaders/basic_vertex.txt",
         "Resources/engine/shaders/basic_fragment.txt");
-    shader->setAttr(0, 3, 3 * sizeof(float), (void*)0);
+
+	// Position attribute
+    shader->setAttr(0, 3, 6 * sizeof(float), (void*)0);
+	// Color attribute
+    shader->setAttr(1, 3, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0); // optional, unbind
+    glBindVertexArray(0);
 }
 
 void EngineRenderer::onUpdate(float deltaTime) {

@@ -22,6 +22,7 @@ GLuint Shader::compileShader(const std::string& source, GLenum type) {
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+		Debug::logError("Shader compilation error: " + std::string(infoLog));
         throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
     }
     return shader;
