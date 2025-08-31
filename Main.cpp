@@ -14,8 +14,7 @@ int main()
 {
     std::cout << __cplusplus << "\n";
 
-	Window::create(1280, 720, "OpenGL Engine [Native]", false, false);
-    if (glfwInit() == GLFW_FALSE) return -1;
+	Window::create(1280, 720, "OpenGL Engine", false, false);
 
     // Try to load custom cursor
     GLFWcursor* cursor = Window::loadCursor("Resources/engine/textures/cursor.png", 0, 1);

@@ -1,7 +1,12 @@
 #include "Window.h"
 
 void Window::create(int width, int height, const std::string& title, bool maximized, bool vsync_flag) {
-    if (!glfwInit()) { std::cerr << "Failed to init GLFW\n"; return; }
+    if (!glfwInit()) {
+		Debug::logError("Failed to init GLFW");
+
+		// Throw error event
+		throw std::runtime_error("Failed to init GLFW");
+    }
 
     WINDOW_WIDTH = width;
     WINDOW_HEIGHT = height;
@@ -24,6 +29,15 @@ void Window::create(int width, int height, const std::string& title, bool maximi
         const GLFWvidmode* vm = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vm) glfwSetWindowPos(window, (vm->width - WINDOW_WIDTH) / 2, (vm->height - WINDOW_HEIGHT) / 2);
     }
+    else
+    {
+		glfwMaximizeWindow(window);
+
+        int w, h;
+        glfwGetWindowSize(window, &w, &h);
+		WINDOW_HEIGHT = h;
+		WINDOW_WIDTH = w;
+    }
 
     // Set static callbacks
     glfwSetWindowSizeCallback(window, &Window::s_window_size_cb);
@@ -39,6 +53,11 @@ void Window::create(int width, int height, const std::string& title, bool maximi
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cerr << "Failed to init GLAD\n"; return; }
 
     glfwSwapInterval(vsync ? 1 : 0);
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+	Debug::log("OpenGL Version: " + std::string((const char*)glGetString(GL_VERSION)));
+	Debug::log("GLFW Version: " + std::string(glfwGetVersionString()));
+	Debug::log("GPU: " + std::string((const char*)glGetString(GL_VENDOR)) + " - " + std::string((const char*)glGetString(GL_RENDERER)));
 }
 
 void Window::destroy() {
@@ -111,7 +130,7 @@ GLFWcursor* Window::loadCursor(const char* path, int hotspotX, int hotspotY) {
     stbi_image_free(data);
 
     if (!cursor) {
-        std::cerr << "Failed to create GLFW cursor from image: " << path << "\n";
+		Debug::logError("Failed to create GLFW cursor from image: " + std::string(path));
         return nullptr;
     }
 

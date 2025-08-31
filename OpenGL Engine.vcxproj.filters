@@ -64,6 +64,9 @@
     <ClCompile Include="AppTime.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\Engine\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -104,6 +107,9 @@
     </ClInclude>
     <ClInclude Include="SystemEvents.h">
       <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source Files\Engine\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
