@@ -12,6 +12,7 @@ This is a simple OpenGL engine implemented in C++. It provides basic functionali
 - Input handling
 - EventBus system for event management
 - Viewport resizing
+- Camera
 
 ## Requirements
 - C++17 or higher (C++20 recommended)
@@ -23,6 +24,7 @@ This is a simple OpenGL engine implemented in C++. It provides basic functionali
 - [GLFW Documentation](https://www.glfw.org/docs/latest/)
 - [GLAD Documentation](https://glad.dav1d.de/)
 - [OpenGL Wiki](https://www.khronos.org/opengl/wiki/Main_Page)
+- [GLM Installation](https://www.youtube.com/watch?v=6nGpoY-L2Xk)
 
 ## Other Resources
 - [stb_image] (https://github.com/nothings/stb/blob/master/stb_image.h)

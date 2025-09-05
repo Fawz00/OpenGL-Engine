@@ -19,7 +19,7 @@ public:
     Shader(const std::string& vertexPath, const std::string& fragmentPath);
     void use();
     void stop();
-    void destroy();
+    ~Shader();
 
     GLint genAttrId(const std::string& name);
     void setAttr(GLint id, GLint size, GLsizei stride, const void* offset);

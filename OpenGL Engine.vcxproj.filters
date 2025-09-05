@@ -25,7 +25,7 @@
     <Filter Include="Source Files\Engine\Core\System\Input">
       <UniqueIdentifier>{7a2a48a6-bb22-45d6-b1a4-9f54cae58fc3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Engine\Renderer">
+    <Filter Include="Source Files\Engine\Core\Renderer">
       <UniqueIdentifier>{91b99336-f5a8-4040-be39-e1583b5ca39b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -53,19 +53,22 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="EngineRenderer.cpp">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="FpsTool.cpp">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="AppTime.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,13 +94,13 @@
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="EngineRenderer.h">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="FpsTool.h">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="AppTime.h">
       <Filter>Source Files\Engine\Core</Filter>
@@ -109,7 +112,10 @@
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
-      <Filter>Source Files\Engine\Renderer</Filter>
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

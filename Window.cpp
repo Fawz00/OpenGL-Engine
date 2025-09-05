@@ -65,6 +65,11 @@ void Window::destroy() {
         glfwDestroyWindow(window);
         window = nullptr;
     }
+    if (cursor) {
+        glfwDestroyCursor(cursor);
+        cursor = nullptr;
+	}
+	EventBus::clear();
     glfwTerminate();
 }
 

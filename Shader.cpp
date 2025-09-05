@@ -60,7 +60,7 @@ void Shader::stop() {
     glUseProgram(0);
 }
 
-void Shader::destroy() {
+Shader::~Shader() {
     if (program != 0) {
         glDeleteProgram(program);
         program = 0;

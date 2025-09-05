@@ -87,6 +87,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +121,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppTime.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EngineRenderer.cpp" />
     <ClCompile Include="FpsTool.cpp" />
@@ -160,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppTime.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="EngineRenderer.h" />
     <ClInclude Include="EventBus.h" />

@@ -57,7 +57,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		EngineRenderer::onUpdate(AppTime::getCurrentDeltaTime());
+		EngineRenderer::onUpdate();
 
         Window::drawFrame();
         Input::update();
@@ -65,6 +65,7 @@ int main()
         FpsTool::endFrame();
     }
 
+	EngineRenderer::onDestroy();
 	Input::destroy();
     Window::destroy();
     return 0;
