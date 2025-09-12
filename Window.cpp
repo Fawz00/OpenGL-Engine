@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "Window.hpp"
 
 void Window::create(int width, int height, const std::string& title, bool maximized, bool vsync_flag) {
     if (!glfwInit()) {
@@ -52,7 +52,7 @@ void Window::create(int width, int height, const std::string& title, bool maximi
     glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cerr << "Failed to init GLAD\n"; return; }
 
-    glfwSwapInterval(vsync ? 1 : 0);
+	enableVsync(vsync);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	Debug::log("OpenGL Version: " + std::string((const char*)glGetString(GL_VERSION)));
@@ -85,6 +85,11 @@ bool Window::isVsync() { return vsync; }
 
 void Window::poolEvent() { glfwPollEvents(); }
 void Window::drawFrame() { if (window) glfwSwapBuffers(window); }
+
+void Window::enableVsync(bool v) {
+    vsync = v;
+    if (window) glfwSwapInterval(vsync ? 1 : 0);
+}
 
 void Window::toggleFullscreen() {
     if (!window) return;

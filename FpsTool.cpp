@@ -1,6 +1,4 @@
-#include "FpsTool.h"
-#include <thread>
-#include <stdexcept>
+#include "FpsTool.hpp"
 
 void FpsTool::setTargetFps(int fps) {
     if (fps <= 0) {

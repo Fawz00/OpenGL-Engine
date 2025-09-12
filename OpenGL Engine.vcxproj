@@ -87,15 +87,16 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"</Command>
+      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
+xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,15 +122,16 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"</Command>
+      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
+xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,27 +158,32 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="MouseInput.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppTime.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Debug.h" />
-    <ClInclude Include="EngineRenderer.h" />
-    <ClInclude Include="EventBus.h" />
-    <ClInclude Include="FpsTool.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="KeyboardInput.h" />
-    <ClInclude Include="I_Lifecycle.h" />
-    <ClInclude Include="MouseInput.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="AppTime.hpp" />
+    <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="Debug.hpp" />
+    <ClInclude Include="EngineRenderer.hpp" />
+    <ClInclude Include="EventBus.hpp" />
+    <ClInclude Include="FpsTool.hpp" />
+    <ClInclude Include="Input.hpp" />
+    <ClInclude Include="KeyboardInput.hpp" />
+    <ClInclude Include="I_Lifecycle.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="Model.hpp" />
+    <ClInclude Include="MouseInput.hpp" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="stb_image.h" />
-    <ClInclude Include="SystemEvents.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="SystemEvents.hpp" />
+    <ClInclude Include="Texture2D.hpp" />
+    <ClInclude Include="Window.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

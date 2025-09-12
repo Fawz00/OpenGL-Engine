@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
 Camera::Camera()
     : pivotPosition{ 0.0f, 0.0f, 0.0f },

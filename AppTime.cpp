@@ -1,4 +1,4 @@
-#include "AppTime.h"
+#include "AppTime.hpp"
 
 void AppTime::update() {
     auto now = clock::now();

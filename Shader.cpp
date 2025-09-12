@@ -1,5 +1,4 @@
-#include "Shader.h"
-#include "Debug.h"
+#include "Shader.hpp"
 
 std::string Shader::loadShaderSource(const std::string& filePath) {
     std::ifstream file(filePath);
@@ -11,7 +10,7 @@ std::string Shader::loadShaderSource(const std::string& filePath) {
     return buffer.str();
 }
 
-GLuint Shader::compileShader(const std::string& source, GLenum type) {
+GLuint Shader::compileShader(const std::string& source, const std::string& path, GLenum type) {
     GLuint shader = glCreateShader(type);
     const char* src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
@@ -22,7 +21,7 @@ GLuint Shader::compileShader(const std::string& source, GLenum type) {
     if (!success) {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-		Debug::logError("Shader compilation error: " + std::string(infoLog));
+        Debug::logError("Shader compilation error:\n" + std::string(infoLog) + "\nShader source path: " + path);
         throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
     }
     return shader;
@@ -32,8 +31,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
     std::string vertexCode = loadShaderSource(vertexPath);
     std::string fragmentCode = loadShaderSource(fragmentPath);
 
-    GLuint vertexShader = compileShader(vertexCode, GL_VERTEX_SHADER);
-    GLuint fragmentShader = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+    GLuint vertexShader = compileShader(vertexCode, vertexPath, GL_VERTEX_SHADER);
+    GLuint fragmentShader = compileShader(fragmentCode, fragmentPath, GL_FRAGMENT_SHADER);
 
     program = glCreateProgram();
     glAttachShader(program, vertexShader);
@@ -71,9 +70,9 @@ GLint Shader::genAttrId(const std::string& name) {
     return glGetAttribLocation(program, name.c_str());
 }
 
-void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset) {
-    glVertexAttribPointer(id, size, GL_FLOAT, GL_FALSE, stride, offset);
+void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type) {
     glEnableVertexAttribArray(id);
+    glVertexAttribPointer(id, size, GL_FLOAT, GL_FALSE, stride, offset);
 }
 
 void Shader::disableAttr(GLint id) {

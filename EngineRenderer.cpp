@@ -1,5 +1,4 @@
-#include "EngineRenderer.h"
-#include "Input.h"
+#include "EngineRenderer.hpp"
 
 float vertices[] = {
     // positions           // texture coords
@@ -47,7 +46,7 @@ void EngineRenderer::onInit() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	texture = new Texture("Resources/engine/textures/image.jpg");
+	texture = new Texture2D("Resources/engine/textures/image.jpg");
 
     shader = new Shader("Resources/engine/shaders/basic_vertex.glsl",
         "Resources/engine/shaders/basic_fragment.glsl");
@@ -67,9 +66,12 @@ void EngineRenderer::onInit() {
 	camera->setPerspective( 60.0f, 0.1f, 100.0f);
 }
 
-void EngineRenderer::onUpdate() {
+void EngineRenderer::onWindowResize() {
     camera->setAspectRatio(Window::width(), Window::height());
-    camera->setRotation(0.0f, Input::mouse.getMouseX()*360.0f/Window::width(), 0.0f);
+}
+
+void EngineRenderer::onUpdate() {
+    camera->setRotation(Input::mouse.getMouseY() * 360.0f / Window::width(), Input::mouse.getMouseX()*360.0f/Window::width(), 0.0f);
 
     shader->use();
     glEnable(GL_DEPTH_TEST);
@@ -87,7 +89,7 @@ void EngineRenderer::onUpdate() {
 	texture->bind(0);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0);
     shader->stop();
 }
 

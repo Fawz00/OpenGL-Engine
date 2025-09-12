@@ -1,4 +1,4 @@
-#include "MouseInput.h"
+#include "MouseInput.hpp"
 
 void MouseInput::init() {
     buttonDown.fill(false);

@@ -64,10 +64,16 @@
     <ClCompile Include="AppTime.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Texture2D.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,46 +81,55 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="Window.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="KeyboardInput.h">
+    <ClInclude Include="KeyboardInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClInclude>
-    <ClInclude Include="MouseInput.h">
+    <ClInclude Include="MouseInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Debug.h">
+    <ClInclude Include="Debug.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="Input.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="I_Lifecycle.h">
+    <ClInclude Include="I_Lifecycle.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="EngineRenderer.h">
+    <ClInclude Include="EngineRenderer.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
+    <ClInclude Include="Shader.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="FpsTool.h">
+    <ClInclude Include="FpsTool.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="AppTime.h">
+    <ClInclude Include="AppTime.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="EventBus.h">
+    <ClInclude Include="EventBus.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="SystemEvents.h">
+    <ClInclude Include="SystemEvents.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Texture2D.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="Camera.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.hpp">
+      <Filter>Source Files\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>

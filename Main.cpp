@@ -3,18 +3,18 @@
 #include<GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "Window.h"
-#include "Debug.h"
-#include "EngineRenderer.h"
-#include "FpsTool.h"
-#include "AppTime.h"
-#include "Input.h"
+#include "Window.hpp"
+#include "Debug.hpp"
+#include "EngineRenderer.hpp"
+#include "FpsTool.hpp"
+#include "AppTime.hpp"
+#include "Input.hpp"
 
 int main()
 {
     std::cout << __cplusplus << "\n";
 
-	Window::create(1280, 720, "OpenGL Engine", false, false);
+	Window::create(1280, 720, "OpenGL Engine", false, true);
 
     // Try to load custom cursor
     GLFWcursor* cursor = Window::loadCursor("Resources/engine/textures/cursor.png", 0, 1);
@@ -38,6 +38,7 @@ int main()
         // Call glViewport once per resize:
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());
+			EngineRenderer::onWindowResize();
             Window::setResized(false);
         }
 
