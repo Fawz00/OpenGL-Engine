@@ -72,6 +72,10 @@ GLint Shader::genAttrId(const std::string& name) {
 
 void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type) {
     glEnableVertexAttribArray(id);
+    if (type == GL_INT) {
+        glVertexAttribIPointer(id, size, type, stride, offset);
+        return;
+	}
     glVertexAttribPointer(id, size, GL_FLOAT, GL_FALSE, stride, offset);
 }
 

@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Window.hpp"
 #include "Debug.hpp"
-#include "EngineRenderer.hpp"
+#include "EngineRendererMesh.hpp"
 #include "FpsTool.hpp"
 #include "AppTime.hpp"
 #include "Input.hpp"
@@ -29,7 +29,7 @@ int main()
 	Input::init();
 
 	// Initialize renderer
-	EngineRenderer::onInit();
+	EngineRendererMesh::onInit();
 
     // Main loop
     while (!Window::shouldClose()) {
@@ -38,7 +38,7 @@ int main()
         // Call glViewport once per resize:
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());
-			EngineRenderer::onWindowResize();
+			EngineRendererMesh::onWindowResize();
             Window::setResized(false);
         }
 
@@ -58,7 +58,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		EngineRenderer::onUpdate();
+		EngineRendererMesh::onUpdate();
 
         Window::drawFrame();
         Input::update();
@@ -66,7 +66,7 @@ int main()
         FpsTool::endFrame();
     }
 
-	EngineRenderer::onDestroy();
+	EngineRendererMesh::onDestroy();
 	Input::destroy();
     Window::destroy();
     return 0;

@@ -78,6 +78,14 @@
     <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -107,11 +115,18 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
+xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -142,17 +157,25 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
+xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AppTime.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EngineRenderer.cpp" />
+    <ClCompile Include="EngineRendererMesh.cpp" />
     <ClCompile Include="FpsTool.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Input.cpp" />
@@ -171,6 +194,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="EngineRenderer.hpp" />
+    <ClInclude Include="EngineRendererMesh.hpp" />
     <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="FpsTool.hpp" />
     <ClInclude Include="Input.hpp" />

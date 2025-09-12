@@ -19,6 +19,7 @@
 #include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Texture2D.hpp"
+#include "Debug.hpp"
 
 using namespace std;
 
@@ -26,13 +27,14 @@ class Model
 {
 public:
     // model data 
-    vector<Texture2D> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-    vector<Mesh>    meshes;
+    vector<Texture2D*> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    vector<Mesh*>    meshes;
     string directory;
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
     Model(string const& path, bool gamma = false);
+    ~Model();
     // draws the model, and thus all its meshes
     void Draw(Shader& shader);
 
@@ -42,5 +44,5 @@ private:
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-    vector<Texture2D> loadMaterialTextures(aiMaterial* mat, aiTextureType type, Texture2D::TextureType texType);
+    vector<Texture2D*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, Texture2D::TextureType texType);
 };

@@ -1,7 +1,7 @@
 #include "Texture2D.hpp"
 
 Texture2D::Texture2D(const char* path, bool alpha, TextureType type) : width(0), height(0), channels(0), ID(0) {
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 	if (alpha) {
 		data = stbi_load(path, &width, &height, &channels, STBI_rgb_alpha);
 	}

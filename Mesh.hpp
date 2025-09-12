@@ -36,16 +36,16 @@ public:
     // mesh Data
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
-    vector<Texture2D>      textures;
-    unsigned int VAO;
+    vector<Texture2D*>   textures;
 
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture2D> textures);
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture2D*> textures);
+	~Mesh();
     void Draw(Shader& shader);
 
 private:
     // render data 
-    unsigned int VBO, EBO;
+    unsigned int VAO, VBO, EBO;
 
     // initializes all the buffer objects/arrays
     void setupMesh();

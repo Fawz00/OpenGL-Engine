@@ -52,7 +52,7 @@
     <ClCompile Include="Input.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="EngineRenderer.cpp">
+    <ClCompile Include="EngineRendererMesh.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
@@ -74,6 +74,9 @@
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="EngineRenderer.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,7 +102,7 @@
     <ClInclude Include="I_Lifecycle.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="EngineRenderer.hpp">
+    <ClInclude Include="EngineRendererMesh.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Shader.hpp">
@@ -130,6 +133,9 @@
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Model.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineRenderer.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
