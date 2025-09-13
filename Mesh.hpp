@@ -38,8 +38,13 @@ public:
     vector<unsigned int> indices;
     vector<Texture2D*>   textures;
 
+    GLenum primitiveType;
+
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture2D*> textures);
+    Mesh(vector<Vertex> vertices,
+        vector<unsigned int> indices,
+        vector<Texture2D*> textures,
+        GLenum primitiveType = GL_TRIANGLES);
 	~Mesh();
     void Draw(Shader& shader);
 

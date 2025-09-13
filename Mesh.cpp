@@ -1,10 +1,11 @@
 #include "Mesh.hpp"
 
-Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture2D*> textures)
+Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture2D*> textures, GLenum primitiveType)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
+	this->primitiveType = primitiveType;
 
 	// Print all vertices for debugging
 	//for (const auto& vertex : vertices) {
@@ -70,7 +71,7 @@ void Mesh::Draw(Shader& shader)
 
     // draw mesh
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(primitiveType, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
 	//shader.stop();
 
     // always good practice to set everything back to defaults once configured.

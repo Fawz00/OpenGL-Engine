@@ -18,6 +18,8 @@ public:
 
 	Texture2D(const std::string& path, bool alpha = false, TextureType type = TextureType::Other);
 	Texture2D(const char* path, bool alpha = false, TextureType type = TextureType::Other);
+	Texture2D(uint8_t* buffer, size_t bufferSize, TextureType type);
+	Texture2D(uint8_t* data, int width, int height, int channels = 4, TextureType type = TextureType::Other);
 	~Texture2D();
 	void bind(unsigned int slot = 0) const;
 	static void unbind();
@@ -33,4 +35,6 @@ private:
 	int width, height, channels;
 	TextureType type;
 	std::string pathSource;
+
+	void loadFromFile(const char* path, bool alpha = false);
 };
