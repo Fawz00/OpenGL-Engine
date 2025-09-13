@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <string>
 
 #include "stb_image.h"
@@ -15,6 +14,7 @@ class Window {
 public:
     // Static interface
     static void create(int width, int height, const std::string& title, bool maximized = false, bool vsync = true);
+	static void setupCursors();
     static void destroy();
     static GLFWwindow* getGLFWwindow();
     static bool shouldClose();
@@ -28,12 +28,20 @@ public:
     static void toggleFullscreen();
     static void poolEvent();
     static void drawFrame();
-    static GLFWcursor* loadCursor(const char* path, int hotspotX, int hotspotY);
+    static void loadCursor(GLFWcursor*& cursor, const char* path, int hotspotX, int hotspotY);
+
+    static inline GLFWcursor* cursorArrow = nullptr;
+    static inline GLFWcursor* cursorHand = nullptr;
+    static inline GLFWcursor* cursorText = nullptr;
+    static inline GLFWcursor* cursorResizeEW = nullptr;
+    static inline GLFWcursor* cursorResizeNS = nullptr;
+    static inline GLFWcursor* cursorResizeNWSE = nullptr;
+    static inline GLFWcursor* cursorResizeNESW = nullptr;
+    static inline GLFWcursor* cursorMove = nullptr;
 
 private:
     // Static state
     static inline GLFWwindow* window = nullptr;
-    static inline GLFWcursor* cursor = nullptr;
 
     static inline int WINDOW_WIDTH = 800;
     static inline int WINDOW_HEIGHT = 600;

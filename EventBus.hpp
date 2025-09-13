@@ -93,7 +93,7 @@ namespace EventBus {
             if (auto* listenerList = std::any_cast<ListenerList>(&it->second)) {
                 auto listenersCopy = *listenerList;
                 for (const auto& pair : listenersCopy) {
-                    pair.second(event); // Panggil fungsi onEvent
+                    pair.second(event);
                 }
             }
         }

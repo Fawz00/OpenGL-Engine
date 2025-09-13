@@ -1,11 +1,12 @@
 #include<iostream>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
+
+// Note: Don't change the order of these includes (from some library dependencies)
+#include "ImGuiWindow.hpp"
 #include "Window.hpp"
 #include "Debug.hpp"
-#include "EngineRendererMesh.hpp"
+#include "EngineRenderer.hpp"
 #include "FpsTool.hpp"
 #include "AppTime.hpp"
 #include "Input.hpp"
@@ -13,23 +14,23 @@
 int main()
 {
     std::cout << __cplusplus << "\n";
-
 	Window::create(1280, 720, "OpenGL Engine", false, true);
+	if (!Window::getGLFWwindow()) {
+		Debug::logError("Failed to create window");
+		return -1;
+	}
 
-    // Try to load custom cursor
-    GLFWcursor* cursor = Window::loadCursor("Resources/engine/textures/cursor.png", 0, 1);
-    if (cursor) {
-        glfwSetCursor(Window::getGLFWwindow(), cursor);
-    }
-    else {
-		Debug::logWarn("Using default system cursor.");
-    }
+	// Setup custom cursors
+	Window::setupCursors();
 
     // Attach input handlers
 	Input::init();
 
+	// ImGUI setup
+	ImGuiWindow::init(Window::getGLFWwindow());
+
 	// Initialize renderer
-	EngineRendererMesh::onInit();
+	EngineRenderer::onInit();
 
     // Main loop
     while (!Window::shouldClose()) {
@@ -38,7 +39,7 @@ int main()
         // Call glViewport once per resize:
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());
-			EngineRendererMesh::onWindowResize();
+			EngineRenderer::onWindowResize();
             Window::setResized(false);
         }
 
@@ -54,11 +55,18 @@ int main()
 			Debug::log("Mouse Click at: " + std::to_string(mx) + ", " + std::to_string(my));
 		}
 
-        // Example clear
+		// Clear screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		EngineRendererMesh::onUpdate();
+		// Start the ImGui frame
+        ImGuiWindow::beginFrame();
+
+		ImGuiWindow::drawWindow();
+		EngineRenderer::onUpdate();
+
+		// End the ImGui
+		ImGuiWindow::endFrame();
 
         Window::drawFrame();
         Input::update();
@@ -66,7 +74,9 @@ int main()
         FpsTool::endFrame();
     }
 
-	EngineRendererMesh::onDestroy();
+	EngineRenderer::onDestroy();
+
+	ImGuiWindow::shutdown();
 	Input::destroy();
     Window::destroy();
     return 0;

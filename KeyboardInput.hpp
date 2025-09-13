@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 
+#include "Debug.hpp"
 #include "EventBus.hpp"
 #include "SystemEvents.hpp"
 

@@ -8,7 +8,7 @@
 
 class Texture2D {
 public:
-	static enum class TextureType {
+	enum class TextureType {
 		Other,
 		TextureDiffuse,
 		TextureSpecular,

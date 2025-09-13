@@ -3,12 +3,17 @@
 out vec4 FragColor;
 
 in vec2 TexCoords;
+in vec3 Normal;
+in vec3 Position;
 
 uniform float time;
 uniform sampler2D texture_diffuse1;
 
 void main()
 {
-	vec3 color = texture(texture_diffuse1, TexCoords).rgb;
-	FragColor = vec4(color, 1.0);
+	vec4 color = texture(texture_diffuse1, TexCoords);
+	if(color.a < 0.2)
+		discard;
+
+	FragColor = color;
 }

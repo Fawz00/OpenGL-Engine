@@ -9,17 +9,19 @@
 #include "Camera.hpp"
 #include "Window.hpp"
 #include "AppTime.hpp"
+#include "Model.hpp"
+
+using namespace std;
 
 class EngineRenderer {
-private:
-	~EngineRenderer();
-	static inline unsigned int VBO, VAO, EBO;
-	static inline Texture2D* texture = nullptr;
-	static inline Shader* shader = nullptr;
-	static inline Camera* camera = nullptr;
-	static void onInit();
-	static void onWindowResize();
-	static void onUpdate();
-	static void onDestroy();
-	friend int main();
+	private:
+		~EngineRenderer();
+		static inline vector<Model*> models;
+		static inline Shader* shader = nullptr;
+		static inline Camera* camera = nullptr;
+		static void onInit();
+		static void onWindowResize();
+		static void onUpdate();
+		static void onDestroy();
+		friend int main();
 };

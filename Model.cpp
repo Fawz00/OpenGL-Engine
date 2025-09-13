@@ -146,20 +146,6 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
     std::vector<Texture2D*> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, Texture2D::TextureType::TextureHeight);
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-    // 1. diffuse maps
-    //vector<Texture2D> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture2D::TextureType::TextureDiffuse);
-    //for (auto& tex : diffuseMaps) textures.push_back(&tex);
-    //// 2. specular maps
-    //vector<Texture2D> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, Texture2D::TextureType::TextureSpecular);
-    //for (auto& tex : specularMaps) textures.push_back(&tex);
-    //// 3. normal maps
-    //std::vector<Texture2D> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, Texture2D::TextureType::TextureNormal);
-    //for (auto& tex : normalMaps) textures.push_back(&tex);
-    //// 4. height maps
-    //std::vector<Texture2D> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, Texture2D::TextureType::TextureHeight);
-    //for (auto& tex : heightMaps) textures.push_back(&tex);
-
-
     return Mesh(vertices, indices, textures);
 }
 

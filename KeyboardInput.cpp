@@ -1,5 +1,4 @@
 #include "KeyboardInput.hpp"
-#include "Debug.hpp"
 
 void KeyboardInput::init() {
     keyDown.fill(false);

@@ -60,15 +60,66 @@ void Window::create(int width, int height, const std::string& title, bool maximi
 	Debug::log("GPU: " + std::string((const char*)glGetString(GL_VENDOR)) + " - " + std::string((const char*)glGetString(GL_RENDERER)));
 }
 
+void Window::setupCursors() {
+    if (!window) return;
+    loadCursor(cursorArrow, "Resources/engine/textures/cursors/arrow.png", 0, 0);
+    loadCursor(cursorHand, "Resources/engine/textures/cursors/hand.png", 8, 0);
+    loadCursor(cursorText, "Resources/engine/textures/cursors/text.png", 8, 8);
+    loadCursor(cursorResizeEW, "Resources/engine/textures/cursors/resize_ew.png", 8, 8);
+    loadCursor(cursorResizeNS, "Resources/engine/textures/cursors/resize_ns.png", 8, 8);
+    loadCursor(cursorResizeNWSE, "Resources/engine/textures/cursors/resize_nwse.png", 8, 8);
+    loadCursor(cursorResizeNESW, "Resources/engine/textures/cursors/resize_nesw.png", 8, 8);
+    loadCursor(cursorMove, "Resources/engine/textures/cursors/move.png", 16, 16);
+
+    // Try to load custom cursor
+    if (cursorArrow) {
+        glfwSetCursor(Window::getGLFWwindow(), cursorArrow);
+    }
+    else {
+        Debug::logWarn("Using default system cursor.");
+    }
+}
+
 void Window::destroy() {
     if (window) {
         glfwDestroyWindow(window);
         window = nullptr;
     }
-    if (cursor) {
-        glfwDestroyCursor(cursor);
-        cursor = nullptr;
+
+	// Clear cursors
+    if (cursorArrow) {
+        glfwDestroyCursor(cursorArrow);
+        cursorArrow = nullptr;
+    }
+    if (cursorHand) {
+        glfwDestroyCursor(cursorHand);
+        cursorHand = nullptr;
 	}
+    if (cursorText) {
+        glfwDestroyCursor(cursorText);
+        cursorText = nullptr;
+    }
+    if (cursorResizeEW) {
+        glfwDestroyCursor(cursorResizeEW);
+        cursorResizeEW = nullptr;
+    }
+    if (cursorResizeNS) {
+        glfwDestroyCursor(cursorResizeNS);
+        cursorResizeNS = nullptr;
+    }
+    if (cursorResizeNWSE) {
+        glfwDestroyCursor(cursorResizeNWSE);
+        cursorResizeNWSE = nullptr;
+    }
+    if (cursorResizeNESW) {
+        glfwDestroyCursor(cursorResizeNESW);
+        cursorResizeNESW = nullptr;
+    }
+    if (cursorMove) {
+        glfwDestroyCursor(cursorMove);
+        cursorMove = nullptr;
+	}
+
 	EventBus::clear();
     glfwTerminate();
 }
@@ -116,14 +167,14 @@ void Window::toggleFullscreen() {
 }
 
 // Load cursor image (PNG, RGBA) using stb_image
-GLFWcursor* Window::loadCursor(const char* path, int hotspotX, int hotspotY) {
-    if (!window) return nullptr;
+void Window::loadCursor(GLFWcursor*& cursor, const char* path, int hotspotX, int hotspotY) {
+    if (!window) return;
 
     int width, height, channels;
     unsigned char* data = stbi_load(path, &width, &height, &channels, 4);
     if (!data) {
         std::cerr << "Failed to load cursor image: " << path << "\n";
-        return nullptr;
+        return;
     }
 
     GLFWimage image;
@@ -140,12 +191,9 @@ GLFWcursor* Window::loadCursor(const char* path, int hotspotX, int hotspotY) {
     stbi_image_free(data);
 
     if (!cursor) {
-		Debug::logError("Failed to create GLFW cursor from image: " + std::string(path));
-        return nullptr;
+        Debug::logError("Failed to create GLFW cursor from image: " + std::string(path));
+        return;
     }
-
-    glfwSetCursor(window, cursor); // set cursor immediately
-    return cursor;
 }
 
 // Static callbacks

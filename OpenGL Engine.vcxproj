@@ -95,7 +95,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,7 +137,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus
  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,7 +158,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,11 +175,18 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EngineRenderer.cpp" />
-    <ClCompile Include="EngineRendererMesh.cpp" />
     <ClCompile Include="FpsTool.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="ImGuiWindow.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="Libraries\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -194,12 +201,21 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="EngineRenderer.hpp" />
-    <ClInclude Include="EngineRendererMesh.hpp" />
     <ClInclude Include="EventBus.hpp" />
     <ClInclude Include="FpsTool.hpp" />
+    <ClInclude Include="ImGuiWindow.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="KeyboardInput.hpp" />
     <ClInclude Include="I_Lifecycle.hpp" />
+    <ClInclude Include="Libraries\include\imgui\imconfig.h" />
+    <ClInclude Include="Libraries\include\imgui\imgui.h" />
+    <ClInclude Include="Libraries\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="Libraries\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="Libraries\include\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Libraries\include\imgui\imgui_internal.h" />
+    <ClInclude Include="Libraries\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Libraries\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="Libraries\include\imgui\imstb_truetype.h" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="MouseInput.hpp" />
