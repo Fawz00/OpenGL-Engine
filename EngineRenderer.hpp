@@ -8,7 +8,7 @@
 #include "Texture2D.hpp"
 #include "Camera.hpp"
 #include "Window.hpp"
-#include "AppTime.hpp"
+#include "Time.hpp"
 #include "Model.hpp"
 
 using namespace std;

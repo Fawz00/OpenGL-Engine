@@ -2,11 +2,12 @@
 
 #include <chrono>
 
-class AppTime {
+class Time {
 public:
-    static float getTime();
-    static float getCurrentDeltaTime();
-    static float getLastDeltaTime();
+    static float getTime(bool scaled = true);
+    static float getCurrentDeltaTime(bool scaled = true);
+    static float getLastDeltaTime(bool scaled = true);
+    static inline float timeScale = 1.0f;
 
 private:
     static void update();

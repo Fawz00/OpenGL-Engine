@@ -3,6 +3,8 @@
 #include "Window.hpp"
 #include <GLFW/glfw3.h>
 
+#include "Time.hpp"
+
 GLFWwindow* ImGuiWindow::g_Window = nullptr;
 std::array<GLFWcursor*, ImGuiMouseCursor_COUNT> ImGuiWindow::myCursors = { nullptr };
 
@@ -58,13 +60,13 @@ void ImGuiWindow::updateMouseCursor() {
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
 		return;
 	if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
-		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
 	else
 	{
 		// Use your cursor array from init()
 		glfwSetCursor(win, myCursors[imgui_cursor] ? myCursors[imgui_cursor] : Window::cursorArrow);
-		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
 
@@ -91,6 +93,12 @@ void ImGuiWindow::drawWindow() {
 			selectedEntity = i;
 		}
 	}
+	ImGui::End();
+
+	// Show statistics window
+	ImGui::Begin("Statistics");
+	ImGui::Text("FPS: %.1f", 1.0f / Time::getLastDeltaTime());
+	ImGui::Text("Frame Time: %.3f ms", Time::getLastDeltaTime() * 1000.0f);
 	ImGui::End();
 
 	updateMouseCursor();

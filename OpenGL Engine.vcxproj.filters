@@ -67,7 +67,7 @@
     <ClCompile Include="FpsTool.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="AppTime.cpp">
+    <ClCompile Include="Time.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="Texture2D.cpp">
@@ -138,7 +138,7 @@
     <ClInclude Include="FpsTool.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="AppTime.hpp">
+    <ClInclude Include="Time.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="EventBus.hpp">

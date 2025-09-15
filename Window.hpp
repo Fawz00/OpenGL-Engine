@@ -29,6 +29,8 @@ public:
     static void poolEvent();
     static void drawFrame();
     static void loadCursor(GLFWcursor*& cursor, const char* path, int hotspotX, int hotspotY);
+	static void showCursor(bool show);
+	static bool isCursorVisible();
 
     static inline GLFWcursor* cursorArrow = nullptr;
     static inline GLFWcursor* cursorHand = nullptr;
@@ -55,6 +57,7 @@ private:
     static inline bool isFocused = true;
     static inline bool isFullscreen = false;
     static inline bool vsync = true;
+	static inline bool cursorVisible = true;
 
     static void setResized(bool b);
 	friend int main();

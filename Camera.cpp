@@ -9,7 +9,8 @@ Camera::Camera()
     nearPlane(0.1f),
     scale(1.0f),
     fov(60.0f),
-    projectionType(PERSPECTIVE)
+    projectionType(PERSPECTIVE),
+    rotationMode(ROTATION_FREE)
 {
 	setAspectRatio(Window::width(), Window::height());
 }
@@ -28,20 +29,52 @@ void Camera::getPivotPosition(float& x, float& y, float& z) const {
     z = pivotPosition[2];
 }
 
-void Camera::getAbsolutePosition(float& x, float& y, float& z) const {
-    // Calculate camera position in world space
-    glm::vec3 pivot(pivotPosition[0], pivotPosition[1], pivotPosition[2]);
+glm::vec3 Camera::getForward() const {
+    // Calculate camera direction
     glm::vec3 direction;
     direction.x = std::cos(glm::radians(rotation[1])) * std::cos(glm::radians(rotation[0]));
     direction.y = std::sin(glm::radians(rotation[0]));
     direction.z = std::sin(glm::radians(rotation[1])) * std::cos(glm::radians(rotation[0]));
+    return glm::normalize(direction);
+}
+
+glm::vec3 Camera::getUp() const {
+    glm::vec3 right = glm::normalize(glm::cross(getForward(), glm::vec3(0.0f, 1.0f, 0.0f)));
+    return glm::normalize(glm::cross(right, getForward()));
+}
+glm::vec3 Camera::getRight() const {
+    return glm::normalize(glm::cross(getForward(), glm::vec3(0.0f, 1.0f, 0.0f)));
+}
+
+void Camera::getWorldPosition(float& x, float& y, float& z) const {
+    // Calculate camera position in world space
+    glm::vec3 pivot(pivotPosition[0], pivotPosition[1], pivotPosition[2]);
+    glm::vec3 direction = getForward();
     glm::vec3 cameraPos = pivot - direction * pivotDistance;
     x = cameraPos.x;
     y = cameraPos.y;
     z = cameraPos.z;
 }
 
+void Camera::setRotationMode(RotationMode mode) {
+    rotationMode = mode;
+}
+
+Camera::RotationMode Camera::getRotationMode() const {
+    return rotationMode;
+}
+
 void Camera::setRotation(float pitch, float yaw, float roll) {
+    if (rotationMode == ROTATION_LIMITED) {
+        // Clamp pitch to [-90° 90°]
+        pitch = std::clamp(pitch, -89.99f, 89.99f);
+    }
+
+	// Wrap to [-180° 180°]
+	pitch = (glm::fract((pitch - 180.0f) / 360.0f) * 360.0f) - 180.0f;
+    yaw   = (glm::fract((yaw   - 180.0f) / 360.0f) * 360.0f) - 180.0f;
+	roll  = (glm::fract((roll  - 180.0f) / 360.0f) * 360.0f) - 180.0f;
+
     rotation[0] = pitch;
     rotation[1] = yaw;
     rotation[2] = roll;
@@ -105,14 +138,18 @@ void Camera::getProjectionMatrix(float* matrix) const {
 }
 
 void Camera::getViewMatrix(float* matrix) const {
-    // Calculate camera position in world space
     glm::vec3 pivot(pivotPosition[0], pivotPosition[1], pivotPosition[2]);
-	glm::vec3 cameraPos = getAbsolutePosition();
+	glm::vec3 cameraPos = getWorldPosition();
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    if (rotation[0] >= 90.0f || rotation[0] <= -90.0f) {
+        up = glm::vec3(0.0f, -1.0f, 0.0f); // Invert up vector when looking straight up or down
+	}
     
     glm::mat4 view = glm::lookAt(
         cameraPos,
         pivot,
-        glm::vec3(0.0f, 1.0f, 0.0f)
+        up
     );
     std::memcpy(matrix, glm::value_ptr(view), sizeof(float) * 16);
 }

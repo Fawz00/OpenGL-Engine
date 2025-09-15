@@ -3,10 +3,11 @@
 #include <iostream>
 #include <string>
 
-#include "SystemEvents.hpp"
-
 namespace Debug {
-	void log(const std::string& message);
-	void logWarn(const std::string& message);
-	void logError(const std::string& message);
+	void log(const std::string& msg);
+	void log(const char* fmt, ...);
+	void logWarn(const std::string& msg);
+	void logWarn(const char* fmt, ...);
+	void logError(const std::string& msg);
+	void logError(const char* fmt, ...);
 };

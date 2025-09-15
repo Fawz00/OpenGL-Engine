@@ -142,6 +142,16 @@ void Window::enableVsync(bool v) {
     if (window) glfwSwapInterval(vsync ? 1 : 0);
 }
 
+void Window::showCursor(bool show) {
+    if (!window) return;
+	cursorVisible = show;
+    glfwSetInputMode(window, GLFW_CURSOR, show ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+}
+
+bool Window::isCursorVisible() {
+	return cursorVisible;
+}
+
 void Window::toggleFullscreen() {
     if (!window) return;
     const GLFWvidmode* vm = glfwGetVideoMode(glfwGetPrimaryMonitor());

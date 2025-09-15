@@ -7,6 +7,9 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Debug.hpp"
 
@@ -29,9 +32,13 @@ public:
     void setInt(const std::string& name, int value);
     void setFloat(const std::string& name, float value);
     void setVec2(const std::string& name, const float* data);
+    void setVec2(const std::string& name, const glm::vec2 &data);
     void setVec3(const std::string& name, const float* data);
+	void setVec3(const std::string& name, const glm::vec3 &data);
     void setVec4(const std::string& name, const float* data);
+	void setVec4(const std::string& name, const glm::vec4 &data);
     void setMat4(const std::string& name, const float* data);
+	void setMat4(const std::string& name, const glm::mat4 &mat);
 
     GLuint getID() const { return program; }
 };

@@ -171,7 +171,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AppTime.cpp" />
+    <ClCompile Include="Time.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EngineRenderer.cpp" />
@@ -196,7 +196,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppTime.hpp" />
+    <ClInclude Include="Time.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Debug.hpp" />
