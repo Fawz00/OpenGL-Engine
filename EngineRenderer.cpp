@@ -5,9 +5,12 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 void EngineRenderer::onInit() {
 	//models.push_back(new Model("Resources/engine/models/backpack.obj"));
-	models.push_back(new Model("Resources/engine/models/cc201_body.obj"));
-	models.push_back(new Model("Resources/engine/models/Kiha32_combined.glb"));
-	models.push_back(new Model("Resources/engine/models/cube.obj"));
+	//models.push_back(new Model("Resources/engine/models/cc201_body.obj"));
+	//models.push_back(new Model("Resources/engine/models/Kiha32_combined.glb"));
+	models.push_back(new Model("Resources/engine/models/sponza_fix.obj"));
+	//models.push_back(new Model("Resources/engine/models/cube.obj"));
+
+	models.shrink_to_fit();
 
     shader = new Shader("Resources/engine/shaders/mesh_vertex.glsl",
         "Resources/engine/shaders/mesh_fragment.glsl");
@@ -39,8 +42,6 @@ void EngineRenderer::onUpdate() {
         cameraPos += forward * Time::getLastDeltaTime() * 2.0f;
 		camera->setPivotPosition(cameraPos.x, cameraPos.y, cameraPos.z);
 	}
-
-	Debug::log("FPS: %.1f", 1.0f / Time::getLastDeltaTime());
 
     shader->use();
     glEnable(GL_DEPTH_TEST);

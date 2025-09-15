@@ -27,7 +27,7 @@ int main()
 	Input::init();
 
 	// ImGUI setup
-	//ImGuiWindow::init(Window::getGLFWwindow());
+	ImGuiWindow::init(Window::getGLFWwindow());
 
 	// Initialize renderer
 	EngineRenderer::onInit();
@@ -54,14 +54,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Start the ImGui frame
-        //ImGuiWindow::beginFrame();
+		//Debug::log("FPS: %.1f", 1.0f / Time::getLastDeltaTime());
 
-		//ImGuiWindow::drawWindow();
+		// Start the ImGui frame
+        ImGuiWindow::beginFrame();
+
+		ImGuiWindow::drawWindow();
 		EngineRenderer::onUpdate();
 
 		// End the ImGui
-		//ImGuiWindow::endFrame();
+		ImGuiWindow::endFrame();
 
         Window::drawFrame();
         Input::update();
@@ -71,7 +73,7 @@ int main()
 
 	EngineRenderer::onDestroy();
 
-	//ImGuiWindow::shutdown();
+	ImGuiWindow::shutdown();
 	Input::destroy();
     Window::destroy();
     return 0;

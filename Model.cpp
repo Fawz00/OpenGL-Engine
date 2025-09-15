@@ -4,6 +4,9 @@ Model::Model(string const& path, bool gamma)
     : gammaCorrection(gamma)
 {
     loadModel(path);
+
+    textures_loaded.shrink_to_fit();
+	meshes.shrink_to_fit();
 }
 
 Model::~Model()

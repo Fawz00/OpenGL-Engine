@@ -14,6 +14,10 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture
 
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
     setupMesh();
+
+    vertices.shrink_to_fit();
+	indices.shrink_to_fit();
+	textures.shrink_to_fit();
 }
 
 Mesh::~Mesh()
