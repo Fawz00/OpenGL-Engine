@@ -21,9 +21,13 @@ void main()
     float lightIntensity = 1.0;
 
     vec4 color = texture(texture_diffuse1, TexCoords);
+    if (color.a < 0.1)
+        discard;
+
+    color.a = 0.5;
 
 	// Ambient
-    vec3 ambient = vec3(0.1) * color.rgb;
+    vec3 ambient = vec3(0.5) * color.rgb;
 
 	// diffuse 
     vec3 norm = normalize(Normal);

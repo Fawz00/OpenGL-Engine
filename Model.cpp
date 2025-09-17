@@ -4,28 +4,12 @@ Model::Model(string const& path, bool gamma)
     : gammaCorrection(gamma)
 {
     loadModel(path);
-
-    textures_loaded.shrink_to_fit();
-	meshes.shrink_to_fit();
-}
-
-Model::~Model()
-{
-    // Cleanup textures
-    for (auto& texture : textures_loaded) {
-        delete texture;
-    }
-
-    // Cleanup meshes
-    for (auto& mesh : meshes) {
-        delete mesh;
-    }
 }
 
 void Model::Draw(Shader& shader)
 {
-    for (unsigned int i = 0; i < meshes.size(); i++) {
-        meshes[i]->Draw(shader);
+    for (auto& mesh : meshes) {
+        mesh->Draw(shader);
     }
 }
 
@@ -70,69 +54,46 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     }
 }
 
-void Model::processMesh(aiMesh* mesh, const aiScene* scene)
-{
-    vector<Vertex> vertices;
-    vector<unsigned int> triIndices;
-    vector<unsigned int> lineIndices;
-    vector<unsigned int> pointIndices;
-    vector<Texture2D*> textures;
+void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> triIndices;
+    std::vector<unsigned int> lineIndices;
+    std::vector<unsigned int> pointIndices;
+    std::vector<Texture2D*> textures;
 
     // --- Vertex data ---
+    vertices.reserve(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
-        glm::vec3 vector;
+        vertex.Position = glm::vec3(mesh->mVertices[i].x,
+            mesh->mVertices[i].y,
+            mesh->mVertices[i].z);
+        vertex.Normal = mesh->HasNormals() ?
+            glm::vec3(mesh->mNormals[i].x,
+                mesh->mNormals[i].y,
+                mesh->mNormals[i].z) : glm::vec3(0.0f);
 
-        // Positions
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z;
-        vertex.Position = vector;
-
-        // Normals
-        if (mesh->HasNormals()) {
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
-            vertex.Normal = vector;
-        }
-
-        // Texture coordinates
         if (mesh->mTextureCoords[0]) {
-            glm::vec2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x;
-            vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.TexCoords = vec;
-
-            // Tangent
-            if (mesh->mTangents) {
-                vertex.Tangent = glm::vec3(
-                    mesh->mTangents[i].x,
+            vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x,
+                mesh->mTextureCoords[0][i].y);
+            if (mesh->mTangents)
+                vertex.Tangent = glm::vec3(mesh->mTangents[i].x,
                     mesh->mTangents[i].y,
-                    mesh->mTangents[i].z
-                );
-            }
-
-            // Bitangent
-            if (mesh->mBitangents) {
-                vertex.Bitangent = glm::vec3(
-                    mesh->mBitangents[i].x,
+                    mesh->mTangents[i].z);
+            if (mesh->mBitangents)
+                vertex.Bitangent = glm::vec3(mesh->mBitangents[i].x,
                     mesh->mBitangents[i].y,
-                    mesh->mBitangents[i].z
-                );
-            }
+                    mesh->mBitangents[i].z);
         }
         else {
-            vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+            vertex.TexCoords = glm::vec2(0.0f);
         }
-
-        vertices.push_back(vertex);
+        vertices.push_back(std::move(vertex));
     }
 
     // --- Indices ---
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-        aiFace face = mesh->mFaces[i];
-
+        const aiFace& face = mesh->mFaces[i];
         if (face.mNumIndices == 1) {
             pointIndices.push_back(face.mIndices[0]);
         }
@@ -145,39 +106,39 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene)
             triIndices.push_back(face.mIndices[1]);
             triIndices.push_back(face.mIndices[2]);
         }
-		// If the face has more than 3 indices, we assume it's a polygon and triangulate it
+		// If the face has more than 3 indices, we ignore it for now
     }
 
     // --- Textures ---
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    auto diffuseMaps = loadMaterialTextures(scene, material, aiTextureType_DIFFUSE, Texture2D::TextureType::TextureDiffuse);
+    auto specularMaps = loadMaterialTextures(scene, material, aiTextureType_SPECULAR, Texture2D::TextureType::TextureSpecular);
+    auto normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::TextureType::TextureNormal);
+    auto heightMaps = loadMaterialTextures(scene, material, aiTextureType_AMBIENT, Texture2D::TextureType::TextureHeight);
 
-    // 1. Diffuse maps
-    vector<Texture2D*> diffuseMaps = loadMaterialTextures(scene, material, aiTextureType_DIFFUSE, Texture2D::TextureType::TextureDiffuse);
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-    // 2. Specular maps
-    vector<Texture2D*> specularMaps = loadMaterialTextures(scene, material, aiTextureType_SPECULAR, Texture2D::TextureType::TextureSpecular);
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-    // 3. Normal maps
-    vector<Texture2D*> normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::TextureType::TextureNormal);
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-    // 4. Height maps
-    vector<Texture2D*> heightMaps = loadMaterialTextures(scene, material, aiTextureType_AMBIENT, Texture2D::TextureType::TextureHeight);
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-    // --- Create Mesh objects ---
-	// Split into separate meshes based on primitive types
+    // --- Submeshes ---
+    std::vector<SubMesh> subMeshes;
     if (!triIndices.empty()) {
-        meshes.push_back(new Mesh(vertices, triIndices, textures, GL_TRIANGLES));
+        subMeshes.push_back({ std::move(triIndices), GL_TRIANGLES });
     }
     if (!lineIndices.empty()) {
-        meshes.push_back(new Mesh(vertices, lineIndices, textures, GL_LINES));
+        subMeshes.push_back({ std::move(lineIndices), GL_LINES });
     }
     if (!pointIndices.empty()) {
-        meshes.push_back(new Mesh(vertices, pointIndices, textures, GL_POINTS));
+        subMeshes.push_back({ std::move(pointIndices), GL_POINTS });
     }
+
+    // --- Create single Mesh with multiple submeshes ---
+    meshes.push_back(std::make_unique<Mesh>(
+        std::move(vertices),
+        std::move(subMeshes),
+        std::move(textures)
+    ));
 }
 
 vector<Texture2D*> Model::loadMaterialTextures(
@@ -192,47 +153,44 @@ vector<Texture2D*> Model::loadMaterialTextures(
         aiString str;
         mat->GetTexture(type, i, &str);
 
-        if (str.C_Str()[0] == '*') {
-            // Embedded texture
-            int texIndex = atoi(str.C_Str() + 1);
+		std::string texID = str.C_Str(); // "*0" for embedded, "texture.jpg" for file
+
+		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+        auto it = textures_loaded.find(texID);
+        if (it != textures_loaded.end()) {
+            textures.push_back(it->second.get());
+            continue;
+        }
+
+		// Check if texture is embedded or from file
+        if (texID[0] == '*') {
+            int texIndex = atoi(texID.c_str() + 1);
             aiTexture* aiTex = scene->mTextures[texIndex];
 
+            std::unique_ptr<Texture2D> texture;
             if (aiTex->mHeight == 0) {
-                // Compressed format (jpg/png)
+				// Compressed texture
                 unsigned char* data = reinterpret_cast<unsigned char*>(aiTex->pcData);
-				size_t size = aiTex->mWidth; // size of the compressed texture data in bytes
-
-                Texture2D* texture = new Texture2D(data, size, texType);
-                textures.push_back(texture);
-                textures_loaded.push_back(texture);
+                size_t size = aiTex->mWidth;
+                texture = std::make_unique<Texture2D>(data, size, texType);
             }
             else {
-                // Raw RGBA (uncompressed)
+				// Uncompressed texture
                 unsigned char* data = reinterpret_cast<unsigned char*>(aiTex->pcData);
                 int width = aiTex->mWidth;
                 int height = aiTex->mHeight;
                 int channels = 4;
-
-                Texture2D* texture = new Texture2D(data, width, height, channels, texType);
-                textures.push_back(texture);
-                textures_loaded.push_back(texture);
+                texture = std::make_unique<Texture2D>(data, width, height, channels, texType);
             }
+
+            textures.push_back(texture.get());
+            textures_loaded.emplace(texID, std::move(texture));
         }
         else {
-			// Texture from file
-            bool skip = false;
-            for (unsigned int j = 0; j < textures_loaded.size(); j++) {
-                if (std::strcmp(textures_loaded[j]->getPath().data(), str.C_Str()) == 0) {
-                    textures.push_back(textures_loaded[j]);
-                    skip = true;
-                    break;
-                }
-            }
-            if (!skip) {
-                Texture2D* texture = new Texture2D("Resources/engine/textures/" + string(str.C_Str()), true, texType);
-                textures.push_back(texture);
-                textures_loaded.push_back(texture);
-            }
+            std::string fullPath = directory + "/" + texID;
+            auto texture = std::make_unique<Texture2D>(fullPath, true, texType);
+            textures.push_back(texture.get());
+            textures_loaded.emplace(texID, std::move(texture));
         }
     }
 

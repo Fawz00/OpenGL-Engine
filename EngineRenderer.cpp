@@ -4,11 +4,8 @@
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 void EngineRenderer::onInit() {
-	//models.push_back(new Model("Resources/engine/models/backpack.obj"));
-	//models.push_back(new Model("Resources/engine/models/cc201_body.obj"));
-	//models.push_back(new Model("Resources/engine/models/Kiha32_combined.glb"));
-	models.push_back(new Model("Resources/engine/models/sponza_fix.obj"));
-	//models.push_back(new Model("Resources/engine/models/cube.obj"));
+	models.push_back(new Model("Resources/engine/models/backpack/backpack.obj"));
+	models.push_back(new Model("Resources/engine/models/char6.gltf"));
 
 	models.shrink_to_fit();
 
@@ -16,9 +13,9 @@ void EngineRenderer::onInit() {
         "Resources/engine/shaders/mesh_fragment.glsl");
 
 	camera = new Camera();
-	camera->setPivotDistance(0.01f);
+	camera->setPivotDistance(0.01f); // FPS style camera
 	camera->setRotation(0.0f, 0.0f, 0.0f);
-	camera->setPerspective( 60.0f, 0.1f, 100.0f);
+	camera->setPerspective( 70.0f, 0.1f, 100.0f);
 	camera->setAspectRatio(Window::width(), Window::height());
 	camera->setRotationMode(Camera::ROTATION_LIMITED);
 
@@ -43,13 +40,14 @@ void EngineRenderer::onUpdate() {
 		camera->setPivotPosition(cameraPos.x, cameraPos.y, cameraPos.z);
 	}
 
-    shader->use();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	shader->use();
 
 	shader->setFloat("time", Time::getTime());
 

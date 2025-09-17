@@ -192,7 +192,7 @@
     <ClInclude Include="ImGuiWindow.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="SmallVertexData.h">
+    <ClInclude Include="SmallVertexData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
