@@ -73,7 +73,7 @@ void Texture2D::unbind() {
 }
 
 void Texture2D::loadFromFile(const char* path, bool alpha) {
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(true);
 
     unsigned char* data = nullptr;
     if (alpha) {

@@ -8,19 +8,26 @@
 
 class Texture2D {
 public:
-	enum class TextureType {
-		Other,
+	enum TextureType {
+		TextureOther,
 		TextureDiffuse,
 		TextureSpecular,
 		TextureNormal,
 		TextureHeight
 	};
 
+	enum TextureFlags : uint32_t {
+		HasDiffuse  = 1 << 0,
+		HasSpecular = 1 << 1,
+		HasNormal   = 1 << 2,
+		HasHeight   = 1 << 3,
+	};
+
 	// Constructors
-	Texture2D(const std::string& path, bool alpha = false, TextureType type = TextureType::Other);
-	Texture2D(const char* path, bool alpha = false, TextureType type = TextureType::Other);
+	Texture2D(const std::string& path, bool alpha = false, TextureType type = TextureOther);
+	Texture2D(const char* path, bool alpha = false, TextureType type = TextureOther);
 	Texture2D(const uint8_t* buffer, size_t bufferSize, TextureType type);
-	Texture2D(const uint8_t* data, int width, int height, int channels = 4, TextureType type = TextureType::Other);
+	Texture2D(const uint8_t* data, int width, int height, int channels = 4, TextureType type = TextureOther);
 
 	~Texture2D();
 	

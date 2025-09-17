@@ -29,6 +29,7 @@ public:
     GLint genAttrId(const std::string& name);
     static void setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type = GL_FLOAT);
     static void disableAttr(GLint id);
+	void setUInt(const std::string& name, unsigned int value);
     void setInt(const std::string& name, int value);
     void setFloat(const std::string& name, float value);
     void setVec2(const std::string& name, const float* data);

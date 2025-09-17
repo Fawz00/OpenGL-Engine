@@ -8,12 +8,12 @@
 #include "SystemEvents.hpp"
 
 namespace {
-    // Helper buat format string dengan va_list
+	// Helper function to format strings
     std::string formatString(const char* fmt, va_list args) {
         va_list args_copy;
         va_copy(args_copy, args);
 
-        // hitung ukuran buffer yang dibutuhkan
+		// Get the size needed
         int size = std::vsnprintf(nullptr, 0, fmt, args_copy);
         va_end(args_copy);
 

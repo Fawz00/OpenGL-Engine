@@ -1,5 +1,7 @@
 #include "Model.hpp"
 
+using namespace std;
+
 Model::Model(string const& path, bool gamma)
     : gammaCorrection(gamma)
 {
@@ -40,8 +42,6 @@ void Model::loadModel(string const& path)
 
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
-    Debug::log("Processing node: " + string(node->mName.C_Str()));
-
     // Process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];

@@ -20,6 +20,8 @@ Mesh::~Mesh() {
 
 void Mesh::Draw(Shader& shader)
 {
+    uint32_t flags = 0;
+
     // bind appropriate textures
 	unsigned int otherNr = 1;
     unsigned int diffuseNr = 1;
@@ -35,18 +37,22 @@ void Mesh::Draw(Shader& shader)
         if (texType == Texture2D::TextureType::TextureDiffuse) {
             name = "texture_diffuse";
             number = std::to_string(diffuseNr++);
+            flags |= Texture2D::HasDiffuse;
         }
         else if (texType == Texture2D::TextureType::TextureSpecular) {
             name = "texture_specular";
             number = std::to_string(specularNr++);
+			flags |= Texture2D::HasSpecular;
         }
         else if (texType == Texture2D::TextureType::TextureNormal) {
             name = "texture_normal";
             number = std::to_string(normalNr++);
+			flags |= Texture2D::HasNormal;
         }
         else if (texType == Texture2D::TextureType::TextureHeight) {
             name = "texture_height";
             number = std::to_string(heightNr++);
+			flags |= Texture2D::HasHeight;
         }
         else {
             name = "texture_other";
@@ -56,6 +62,9 @@ void Mesh::Draw(Shader& shader)
         shader.setInt(name + number, i);
         textures[i]->bind(i);
     }
+
+	// Texture bitmask for shader
+    shader.setUInt("uTextureFlags", flags);
 
     // draw mesh
     glBindVertexArray(VAO);

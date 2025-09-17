@@ -11,12 +11,10 @@
 #include "Time.hpp"
 #include "Model.hpp"
 
-using namespace std;
-
 class EngineRenderer {
 	private:
 		~EngineRenderer();
-		static inline vector<Model*> models;
+		static inline std::vector<Model*> models;
 		static inline Shader* shader = nullptr;
 		static inline Camera* camera = nullptr;
 		static void onInit();
