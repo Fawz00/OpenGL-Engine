@@ -25,9 +25,9 @@ uniform float time;
 
 void main()
 {
-    vec3 lightColor      = vec3(1.0, 0.9, 0.875);
+    vec3 lightColor      = vec3(1.0, 0.85, 0.75);
 
-    vec3 lightDir = normalize(tangentLightPos - tangentPos);
+    vec3 lightDir = normalize(tangentLightPos);
     vec3 viewDir = normalize(tangentViewPos - tangentPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
 

@@ -3,12 +3,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
+#include "I_Texture.hpp"
 
 #include "Debug.hpp"
 
-class Texture2D {
+class Texture2D : public I_Texture {
 public:
-	enum TextureType {
+	enum Texture2DType {
 		TextureOther,
 		TextureDiffuse,
 		TextureSpecular,
@@ -16,7 +17,7 @@ public:
 		TextureHeight
 	};
 
-	enum TextureFlags : uint32_t {
+	enum Texture2DFlags : uint32_t {
 		HasDiffuse  = 1 << 0,
 		HasSpecular = 1 << 1,
 		HasNormal   = 1 << 2,
@@ -24,10 +25,10 @@ public:
 	};
 
 	// Constructors
-	Texture2D(const std::string& path, bool alpha = false, TextureType type = TextureOther);
-	Texture2D(const char* path, bool alpha = false, TextureType type = TextureOther);
-	Texture2D(const uint8_t* buffer, size_t bufferSize, TextureType type);
-	Texture2D(const uint8_t* data, int width, int height, int channels = 4, TextureType type = TextureOther);
+	Texture2D(const std::string& path, bool alpha = false, Texture2DType type = TextureOther);
+	Texture2D(const char* path, bool alpha = false, Texture2DType type = TextureOther);
+	Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type);
+	Texture2D(const uint8_t* data, int width, int height, int channels = 4, Texture2DType type = TextureOther);
 
 	~Texture2D();
 	
@@ -36,15 +37,16 @@ public:
 	
 	inline int getWidth() const { return width; }
 	inline int getHeight() const { return height; }
+	inline int getSize() const { return width * height * channels; }
 	inline unsigned int getId() const { return ID; }
-	inline TextureType getType() const { return type; }
+	inline Texture2DType getType() const { return type; }
 	void setPath(const std::string& path) { pathSource = path; }
 	inline std::string getPath() const { return pathSource; }
 
 private:
 	unsigned int ID;
 	int width, height, channels;
-	TextureType type;
+	Texture2DType type;
 	std::string pathSource;
 
 	// Helpers

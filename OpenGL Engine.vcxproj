@@ -171,6 +171,9 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="TextureCubeMap.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Debug.cpp" />
@@ -196,7 +199,13 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.hpp" />
+    <ClInclude Include="Animator.hpp" />
+    <ClInclude Include="AssimpGLMHelpers.hpp" />
+    <ClInclude Include="Bone.hpp" />
+    <ClInclude Include="I_Texture.hpp" />
     <ClInclude Include="SmallVertexData.hpp" />
+    <ClInclude Include="TextureCubeMap.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Constants.hpp" />

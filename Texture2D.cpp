@@ -1,6 +1,5 @@
 #include "Texture2D.hpp"
 
-
 namespace {
     GLenum pickFormat(int channels) {
         switch (channels) {
@@ -12,10 +11,10 @@ namespace {
     }
 }
 
-Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, TextureType type)
+Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type)
     : ID(0), width(0), height(0), channels(0), type(type)
 {
-    stbi_set_flip_vertically_on_load(false);
+    stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load_from_memory(
         buffer,
         static_cast<int>(bufferSize),
@@ -32,7 +31,7 @@ Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, TextureType type)
     stbi_image_free(data);
 }
 
-Texture2D::Texture2D(const uint8_t* data, int width, int height, int channels, TextureType type)
+Texture2D::Texture2D(const uint8_t* data, int width, int height, int channels, Texture2DType type)
     : ID(0), width(width), height(height), channels(channels), type(type)
 {
     Debug::log("Creating texture from raw data: " +
@@ -43,14 +42,14 @@ Texture2D::Texture2D(const uint8_t* data, int width, int height, int channels, T
     uploadToGPU(data, format);
 }
 
-Texture2D::Texture2D(const char* path, bool alpha, TextureType type)
+Texture2D::Texture2D(const char* path, bool alpha, Texture2DType type)
     : width(0), height(0), channels(0), ID(0), type(type)
 {
     pathSource = std::string(path);
     loadFromFile(path, alpha);
 }
 
-Texture2D::Texture2D(const std::string& path, bool alpha, TextureType type)
+Texture2D::Texture2D(const std::string& path, bool alpha, Texture2DType type)
     : Texture2D(path.c_str(), alpha, type) {
 }
 

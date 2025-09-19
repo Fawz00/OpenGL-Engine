@@ -34,6 +34,15 @@
     <Filter Include="Source Files\Engine\Libraries\Imgui">
       <UniqueIdentifier>{fb0b4979-adf1-4e33-922a-4663d6815c89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{b204f65a-fe68-4081-9709-e842ccaf237f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\Textures">
+      <UniqueIdentifier>{e89cef00-d00a-4718-8942-e68648c014c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\Models">
+      <UniqueIdentifier>{4beb3ce8-be7b-44aa-8ba5-b7bfa2aaa263}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
@@ -70,16 +79,7 @@
     <ClCompile Include="Time.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Texture2D.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Libraries\include\imgui\imgui.cpp">
@@ -106,6 +106,24 @@
     <ClCompile Include="ImGuiWindow.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
+    <ClCompile Include="Texture2D.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureCubeMap.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Animator.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -126,9 +144,6 @@
     <ClInclude Include="Input.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="I_Lifecycle.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="EngineRenderer.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
@@ -147,20 +162,11 @@
     <ClInclude Include="SystemEvents.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="Texture2D.hpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Constants.hpp">
       <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.hpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Libraries\include\imgui\imconfig.h">
       <Filter>Source Files\Engine\Libraries\Imgui</Filter>
@@ -194,6 +200,36 @@
     </ClInclude>
     <ClInclude Include="SmallVertexData.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="I_Texture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="I_Lifecycle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpGLMHelpers.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2D.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureCubeMap.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Bone.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Animator.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
