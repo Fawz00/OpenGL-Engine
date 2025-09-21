@@ -20,7 +20,7 @@ void EngineRenderer::onInit() {
 	mat2 = glm::translate(mat2, glm::vec3(2.0f, 0.0f, -2.0f));
 	modelMatrices.push_back(mat2);
 
-	models.push_back(new Model("Resources/engine/models/vampire/dancing_vampire.dae", Model::ANIMATED));
+	models.push_back(new Model("Resources/engine/models/vampire/dancing_vampire.dae", Model::SKINNED));
 	glm::mat4 mat3 = glm::mat4(1.0f);
 	mat3 = glm::translate(mat3, glm::vec3(2.0f, 0.0f, 2.0f));
 	modelMatrices.push_back(mat3);
@@ -41,7 +41,7 @@ void EngineRenderer::onInit() {
 
 	skyboxShader = new Shader("Resources/engine/shaders/skybox_vertex.glsl",
 		"Resources/engine/shaders/skybox_fragment.glsl");
-    shader = new Shader("Resources/engine/shaders/mesh_vertex.glsl",
+    shader = new Shader("Resources/engine/shaders/mesh_skinned_vertex.glsl",
         "Resources/engine/shaders/mesh_fragment.glsl");
 
 	camera = new Camera();

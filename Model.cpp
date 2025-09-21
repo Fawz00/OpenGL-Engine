@@ -66,7 +66,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
 		
-        if (mode & ANIMATED) {
+        if (mode & SKINNED) {
             SetVertexBoneDataToDefault(vertex);
 		}
         vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
@@ -129,7 +129,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
 	// --- Bones ---
-    if (mode & ANIMATED) {
+    if (mode & SKINNED) {
         ExtractBoneWeightForVertices(vertices, mesh, scene);
 	}
 

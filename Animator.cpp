@@ -1,57 +1,83 @@
 #include "Animator.hpp"
 
-Animator::Animator(Animation* animation) : m_CurrentAnimation(animation), m_CurrentTime(0.0f), m_DeltaTime(0.0f)
+Animator::Animator(Animation* animation)
+	: m_CurrentAnimation(animation),
+	m_CurrentTime(0.0f),
+	m_DeltaTime(0.0f)
 {
-	m_CurrentTime = 0.0f;
-	m_CurrentAnimation = animation;
+	// If animation is valid, resize final matrices to match number of bones
+	if (animation) {
+		m_FinalBoneMatrices.resize(animation->GetBoneIDMap().size(), glm::mat4(1.0f));
+	}
+	else {
+		m_FinalBoneMatrices.resize(100, glm::mat4(1.0f)); // fallback default
+	}
 
-	m_FinalBoneMatrices.reserve(100);
+	// UBO
+	glGenBuffers(1, &m_BonesUBO);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_BonesUBO);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * m_FinalBoneMatrices.size(), nullptr, GL_DYNAMIC_DRAW);
 	
-	for (int i = 0; i < 100; i++)
-		m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
+	// binding point = 0
+	glBindBufferRange(GL_UNIFORM_BUFFER, m_BindingPoint, m_BonesUBO, 0, sizeof(glm::mat4) * m_FinalBoneMatrices.size());
 }
 
-void Animator::UpdateAnimation(Shader* shader)
-{
+Animator::~Animator() {
+	glDeleteBuffers(1, &m_BonesUBO);
+}
+
+void Animator::UpdateAnimation(Shader* shader) {
 	m_DeltaTime = Time::getLastDeltaTime();
-	if (m_CurrentAnimation)
-	{
+
+	if (m_CurrentAnimation) {
 		m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * m_DeltaTime;
 		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
+
+		// Recursive update
 		CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
 	}
 
-	auto transforms = GetFinalBoneMatrices();
-	for (int i = 0; i < transforms.size(); ++i)
-		shader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+	// Update shader with final bone matrices
+	// Use UBO instead of setting each matrix individually
+	glBindBuffer(GL_UNIFORM_BUFFER, m_BonesUBO);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * m_FinalBoneMatrices.size(), m_FinalBoneMatrices.data());
+
+	GLuint blockIndex = glGetUniformBlockIndex(shader->getID(), "Bones");
+	if (blockIndex != GL_INVALID_INDEX)
+		glUniformBlockBinding(shader->getID(), blockIndex, m_BindingPoint);
 }
 
-void Animator::PlayAnimation(Animation* pAnimation)
-{
-	m_CurrentAnimation = pAnimation;
+void Animator::PlayAnimation(Animation* animation) {
+	m_CurrentAnimation = animation;
 	m_CurrentTime = 0.0f;
+
+	if (animation) {
+		m_FinalBoneMatrices.assign(animation->GetBoneIDMap().size(), glm::mat4(1.0f));
+	}
 }
 
-void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
-{
-	std::string nodeName = node->name;
+void Animator::CalculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform) {
 	glm::mat4 nodeTransform = node->transformation;
-	Bone* bone = m_CurrentAnimation->FindBone(nodeName);
-	if (bone)
-	{
+
+	Bone* bone = m_CurrentAnimation->FindBone(node->name);
+	if (bone) {
 		bone->Update(m_CurrentTime);
 		nodeTransform = bone->GetLocalTransform();
 	}
-	glm::mat4 globalTransformation = parentTransform * nodeTransform;
-	auto boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
-	if (boneInfoMap.find(nodeName) != boneInfoMap.end())
-	{
-		int index = boneInfoMap[nodeName].id;
-		glm::mat4 offset = boneInfoMap[nodeName].offset;
-		m_FinalBoneMatrices[index] = globalTransformation * offset;
+
+	glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+	const auto& boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+	auto it = boneInfoMap.find(node->name);
+	if (it != boneInfoMap.end()) {
+		int index = it->second.id;
+		const glm::mat4& offset = it->second.offset;
+		if (index < static_cast<int>(m_FinalBoneMatrices.size())) {
+			m_FinalBoneMatrices[index] = globalTransform * offset;
+		}
 	}
-	for (int i = 0; i < node->childrenCount; i++)
-	{
-		CalculateBoneTransform(&node->children[i], globalTransformation);
+
+	for (int i = 0; i < node->childrenCount; i++) {
+		CalculateBoneTransform(&node->children[i], globalTransform);
 	}
 }

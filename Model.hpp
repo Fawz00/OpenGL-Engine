@@ -36,7 +36,7 @@ class Model
 public:
     enum ModelMode : uint32_t {
 		NONE            = 0,
-        ANIMATED        = 1 << 0,
+        SKINNED        = 1 << 0,
 		NO_TEXTURES     = 1 << 1,
 		NO_TANGENTS     = 1 << 2,
 		FORCE_TRIANGLES = 1 << 3,

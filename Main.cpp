@@ -14,7 +14,7 @@
 int main()
 {
     std::cout << __cplusplus << "\n";
-	Window::create(1280, 720, "OpenGL Engine", false, true);
+	Window::create(1280, 720, "OpenGL Engine", false, false);
 	if (!Window::getGLFWwindow()) {
 		Debug::logError("Failed to create window");
 		return -1;
