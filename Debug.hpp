@@ -4,6 +4,13 @@
 #include <string>
 
 namespace Debug {
+	enum LogLevel {
+		Info,
+		Warning,
+		Error,
+		Debug
+	};
+
 	void log(const std::string& msg);
 	void log(const char* fmt, ...);
 	void logWarn(const std::string& msg);

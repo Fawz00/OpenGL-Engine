@@ -1,8 +1,5 @@
 #include "EngineRenderer.hpp"
 
-// Placeholder for camera movement
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-
 void EngineRenderer::onInit() {
 
 	// Models and their matrices
@@ -20,12 +17,13 @@ void EngineRenderer::onInit() {
 	mat2 = glm::translate(mat2, glm::vec3(2.0f, 0.0f, -2.0f));
 	modelMatrices.push_back(mat2);
 
-	models.push_back(new Model("Resources/engine/models/vampire/dancing_vampire.dae", Model::SKINNED));
+	models.push_back(new Model("Resources/engine/models/dance.fbx", Model::SKINNED));
 	glm::mat4 mat3 = glm::mat4(1.0f);
 	mat3 = glm::translate(mat3, glm::vec3(2.0f, 0.0f, 2.0f));
+	mat3 = glm::scale(mat3, glm::vec3(0.01f)); // FBX model is huge
 	modelMatrices.push_back(mat3);
 
-	danceAnimation = new Animation("Resources/engine/models/vampire/dancing_vampire.dae", models[3]);
+	danceAnimation = new Animation("Resources/engine/models/Happy.fbx", models[3]);
 	animator = new Animator(danceAnimation);
 
 	// Cube map (skybox)
@@ -47,7 +45,7 @@ void EngineRenderer::onInit() {
 	camera = new Camera();
 	camera->setPivotDistance(0.01f); // FPS style camera
 	camera->setRotation(0.0f, 0.0f, 0.0f);
-	camera->setPerspective( 70.0f, 0.1f, 100.0f);
+	camera->setPerspective( 70.0f, 0.1f, 1000.0f);
 	camera->setAspectRatio(Window::width(), Window::height());
 	camera->setRotationMode(Camera::ROTATION_LIMITED);
 
@@ -67,13 +65,11 @@ void EngineRenderer::onUpdate() {
 
 	if (Input::keyboard.isKeyDown(GLFW_KEY_W)) {
 		glm::vec3 forward = camera->getForward();
-        cameraPos += forward * Time::getLastDeltaTime() * 2.0f;
-		camera->setPivotPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+        camera->setPivotPosition( camera->getPivotPosition() + forward * Time::getLastDeltaTime() * 2.0f );
 	}
 	if (Input::keyboard.isKeyDown(GLFW_KEY_S)) {
 		glm::vec3 forward = camera->getForward();
-		cameraPos -= forward * Time::getLastDeltaTime() * 2.0f;
-		camera->setPivotPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+		camera->setPivotPosition( camera->getPivotPosition() - forward * Time::getLastDeltaTime() * 2.0f);
 	}
 
 	// Render skybox first

@@ -14,7 +14,7 @@
 int main()
 {
     std::cout << __cplusplus << "\n";
-	Window::create(1280, 720, "OpenGL Engine", false, false);
+	Window::create(1280, 720, "OpenGL 3D", false, false);
 	if (!Window::getGLFWwindow()) {
 		Debug::logError("Failed to create window");
 		return -1;
@@ -47,7 +47,8 @@ int main()
             Window::toggleFullscreen();
 		}
         if (Input::keyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
-            Window::setShouldClose(true);
+			Window::showCursor(!Window::isCursorVisible());
+            //Window::setShouldClose(true);
 		}
 
 		// Clear screen

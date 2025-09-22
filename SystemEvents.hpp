@@ -2,9 +2,9 @@
 
 #include <GLFW/glfw3.h>
 #include <string>
+#include <chrono>
 
-#include "Constants.hpp"
-
+// Event structures for Window events
 struct WindowResizeEvent {
 	int width;
 	int height;
@@ -18,6 +18,8 @@ struct WindowCloseEvent {
 	WindowCloseEvent() {}
 };
 
+
+// Event structures for Input events
 struct KeyEvent {
 	int key;
 	int scancode;
@@ -46,8 +48,11 @@ struct MouseScrollEvent {
 	MouseScrollEvent(double ox, double oy) : offsetx(ox), offsety(oy) {}
 };
 
+// Event structure for Debug log events
 struct DebugLogEvent {
 	std::string message;
-	Constants::LogLevel level;
-	DebugLogEvent(const std::string& msg, Constants::LogLevel lv) : message(msg), level(lv) {}
+	Debug::LogLevel level;
+	std::chrono::system_clock::time_point timestamp;
+	DebugLogEvent(const std::string& msg, Debug::LogLevel lv)
+		: message(msg), level(lv), timestamp(std::chrono::system_clock::now()) {}
 };

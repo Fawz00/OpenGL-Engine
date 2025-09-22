@@ -4,9 +4,11 @@
 #include <GLFW/glfw3.h>
 
 #include "Time.hpp"
+#include "FpsTool.hpp"
 
 GLFWwindow* ImGuiWindow::g_Window = nullptr;
 std::array<GLFWcursor*, ImGuiMouseCursor_COUNT> ImGuiWindow::myCursors = { nullptr };
+std::vector<std::string>* ImGuiWindow::logMessages;
 
 void ImGuiWindow::init(GLFWwindow* window) {
 	g_Window = window;
@@ -26,10 +28,24 @@ void ImGuiWindow::init(GLFWwindow* window) {
 	ImGuiIO& io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 	io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange; // allow ImGui to request cursors
+	//io.MouseDrawCursor = true;
 
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330 core");
+
+	// Logging
+	logWatcherId = EventBus::subscribe<DebugLogEvent>([](const DebugLogEvent& e) {
+		handleLog(e.timestamp, e.message, e.level);
+	});
+}
+void ImGuiWindow::handleLog(std::chrono::system_clock::time_point timestamp, const std::string& msg, Debug::LogLevel lv) {
+	if (logMessages) {
+		logMessages->push_back(msg);
+		if (logMessages->size() > 20) {
+			logMessages->erase(logMessages->begin());
+		}
+	}
 }
 
 void ImGuiWindow::beginFrame() {
@@ -40,6 +56,7 @@ void ImGuiWindow::beginFrame() {
 
 void ImGuiWindow::endFrame() {
 	// Rendering
+	updateMouseCursor();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -50,15 +67,26 @@ void ImGuiWindow::shutdown() {
 	ImGui::DestroyContext();
 
 	g_Window = nullptr;
+
+	// Logging
+	if (logWatcherId != 0) {
+		EventBus::unsubscribe<DebugLogEvent>(logWatcherId);
+		logWatcherId = 0;
+	}
+	if (logMessages) {
+		delete logMessages;
+		logMessages = nullptr;
+	}
 }
 
 void ImGuiWindow::updateMouseCursor() {
-	// Handle ImGui requested cursor change
 	ImGuiIO& io = ImGui::GetIO();
 	GLFWwindow* win = g_Window;
 	ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
 		return;
+	
 	if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
 		//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
@@ -73,7 +101,7 @@ void ImGuiWindow::updateMouseCursor() {
 
 
 void ImGuiWindow::drawWindow() {
-	// dummy entity list
+	// dummy entity list for next development
 	struct Entity {
 		std::string name;
 	};
@@ -97,9 +125,19 @@ void ImGuiWindow::drawWindow() {
 
 	// Show statistics window
 	ImGui::Begin("Statistics");
-	ImGui::Text("FPS: %.1f", 1.0f / Time::getLastDeltaTime());
+	ImGui::Text("FPS: %.1f", FpsTool::getFps());
 	ImGui::Text("Frame Time: %.3f ms", Time::getLastDeltaTime() * 1000.0f);
+	ImGui::Text("Current Time: %.2f s", Time::getTime());
+	ImGui::Text("Frame count: %d", ImGui::GetFrameCount());
 	ImGui::End();
 
-	updateMouseCursor();
+	// Show log from EventBus
+	ImGui::Begin("Event Log");
+	if (!logMessages) {
+		logMessages = new std::vector<std::string>();
+	}
+	for (const auto& msg : *logMessages) {
+		ImGui::TextUnformatted(msg.c_str());
+	}
+	ImGui::End();
 }

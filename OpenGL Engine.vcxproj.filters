@@ -129,9 +129,6 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window.hpp">
-      <Filter>Source Files\Engine\Core\System</Filter>
-    </ClInclude>
     <ClInclude Include="KeyboardInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClInclude>
@@ -164,9 +161,6 @@
     </ClInclude>
     <ClInclude Include="Camera.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Constants.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Libraries\include\imgui\imconfig.h">
       <Filter>Source Files\Engine\Libraries\Imgui</Filter>
@@ -230,6 +224,9 @@
     </ClInclude>
     <ClInclude Include="Animator.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -174,20 +174,18 @@ vector<Texture2D*> Model::loadMaterialTextures(
             continue;
         }
 
-		// Check if texture is embedded or from file
-        if (texID[0] == '*') {
-            int texIndex = atoi(texID.c_str() + 1);
-            aiTexture* aiTex = scene->mTextures[texIndex];
-
+        // --- Embedded? ---
+        const aiTexture* aiTex = scene->GetEmbeddedTexture(texID.c_str());
+        if (aiTex) {
             std::unique_ptr<Texture2D> texture;
             if (aiTex->mHeight == 0) {
-				// Compressed texture
+                // Compressed (JPG/PNG)
                 unsigned char* data = reinterpret_cast<unsigned char*>(aiTex->pcData);
                 size_t size = aiTex->mWidth;
                 texture = std::make_unique<Texture2D>(data, size, texType);
             }
             else {
-				// Uncompressed texture
+                // Uncompressed (raw BGRA/RGBA)
                 unsigned char* data = reinterpret_cast<unsigned char*>(aiTex->pcData);
                 int width = aiTex->mWidth;
                 int height = aiTex->mHeight;
@@ -199,7 +197,11 @@ vector<Texture2D*> Model::loadMaterialTextures(
             textures_loaded.emplace(texID, std::move(texture));
         }
         else {
-            std::string fullPath = directory + "/" + texID;
+            // --- External ---
+            std::string fullPath = texID;
+            if (fullPath.find(':') == std::string::npos && fullPath[0] != '/') {
+                fullPath = directory + "/" + texID;
+            }
             auto texture = std::make_unique<Texture2D>(fullPath, true, texType);
             textures.push_back(texture.get());
             textures_loaded.emplace(texID, std::move(texture));

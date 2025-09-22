@@ -117,6 +117,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,6 +160,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -208,7 +210,6 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="TextureCubeMap.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="Constants.hpp" />
     <ClInclude Include="Debug.hpp" />
     <ClInclude Include="EngineRenderer.hpp" />
     <ClInclude Include="EventBus.hpp" />

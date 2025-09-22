@@ -26,7 +26,7 @@ namespace {
 }
 
 void Debug::log(const std::string& msg) {
-    EventBus::publish(DebugLogEvent(msg, Constants::LogLevel::Warning));
+    EventBus::publish(DebugLogEvent(msg, LogLevel::Warning));
     std::cout << "[LOG] " << msg << std::endl;
 }
 
@@ -36,12 +36,12 @@ void Debug::log(const char* fmt, ...) {
     std::string message = formatString(fmt, args);
     va_end(args);
 
-    EventBus::publish(DebugLogEvent(message, Constants::LogLevel::Info));
+    EventBus::publish(DebugLogEvent(message, LogLevel::Info));
     std::cout << "[LOG] " << message << std::endl;
 }
 
 void Debug::logWarn(const std::string& msg) {
-    EventBus::publish(DebugLogEvent(msg, Constants::LogLevel::Warning));
+    EventBus::publish(DebugLogEvent(msg, LogLevel::Warning));
     std::cout << "[WARN] " << msg << std::endl;
 }
 
@@ -51,12 +51,12 @@ void Debug::logWarn(const char* fmt, ...) {
     std::string message = formatString(fmt, args);
     va_end(args);
 
-    EventBus::publish(DebugLogEvent(message, Constants::LogLevel::Warning));
+    EventBus::publish(DebugLogEvent(message, LogLevel::Warning));
     std::cout << "[WARN] " << message << std::endl;
 }
 
 void Debug::logError(const std::string& msg) {
-    EventBus::publish(DebugLogEvent(msg, Constants::LogLevel::Error));
+    EventBus::publish(DebugLogEvent(msg, LogLevel::Error));
     std::cerr << "[ERROR] " << msg << std::endl;
 }
 
@@ -66,6 +66,6 @@ void Debug::logError(const char* fmt, ...) {
     std::string message = formatString(fmt, args);
     va_end(args);
 
-    EventBus::publish(DebugLogEvent(message, Constants::LogLevel::Error));
+    EventBus::publish(DebugLogEvent(message, LogLevel::Error));
     std::cerr << "[ERROR] " << message << std::endl;
 }

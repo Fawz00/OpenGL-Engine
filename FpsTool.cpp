@@ -18,8 +18,7 @@ double FpsTool::getFps() {
 
 void FpsTool::endFrame() {
     frameEndTime = clock::now();
-    frameDuration = std::chrono::duration_cast<nanoseconds>(frameEndTime - frameStartTime);
-    resetTimer();
+    frameDuration = frameEndTime - frameStartTime;
 
     if (limitFps && frameDuration < frameInterval) {
         sleepDuration = frameInterval - frameDuration;
@@ -28,6 +27,8 @@ void FpsTool::endFrame() {
     else {
         sleepDuration = nanoseconds{ 0 };
     }
+
+    resetTimer();
 }
 
 void FpsTool::enableLimit(bool enable) {
