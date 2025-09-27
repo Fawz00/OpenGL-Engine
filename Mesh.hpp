@@ -31,6 +31,13 @@ struct SubMesh {
     unsigned int EBO = 0;
 };
 
+enum Texture2DFlags : uint32_t {
+    HasDiffuse = 1 << 0,
+    HasSpecular = 1 << 1,
+    HasNormal = 1 << 2,
+    HasHeight = 1 << 3,
+};
+
 class Mesh {
 public:
     // constructor
@@ -38,6 +45,14 @@ public:
         std::vector<SubMesh> subMeshes,
         std::vector<Texture2D*> textures);
     ~Mesh();
+
+    // No copy
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
+    // Move allowed
+    Mesh(Mesh&&) noexcept = default;
+    Mesh& operator=(Mesh&&) noexcept = default;
 
     void Draw(Shader& shader);
 

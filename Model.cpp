@@ -24,7 +24,8 @@ void Model::loadModel(string const& path)
         aiProcess_Triangulate |
         aiProcess_GenSmoothNormals |
         //aiProcess_FlipUVs |
-        aiProcess_CalcTangentSpace
+        aiProcess_GenNormals |
+		aiProcess_CalcTangentSpace * (!(mode & NO_TANGENTS))
     );
 
     // Check for errors
@@ -69,25 +70,50 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         if (mode & SKINNED) {
             SetVertexBoneDataToDefault(vertex);
 		}
-        vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
-        vertex.Normal = mesh->HasNormals() ?
-            AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]) : glm::vec3(0.0f);
 
+        vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
+        vertex.Normal = mesh->HasNormals()
+            ? AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i])
+            : glm::vec3(0.0f);
+
+		// Texture coordinates
         if (mesh->mTextureCoords[0] && !(mode & NO_TEXTURES)) {
             vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x,
                 mesh->mTextureCoords[0][i].y);
-			if (mesh->mTangents && !(mode & NO_TANGENTS))
-                vertex.Tangent = glm::vec3(mesh->mTangents[i].x,
-                    mesh->mTangents[i].y,
-                    mesh->mTangents[i].z);
-			if (mesh->mBitangents && !(mode & NO_TANGENTS))
-                vertex.Bitangent = glm::vec3(mesh->mBitangents[i].x,
-                    mesh->mBitangents[i].y,
-                    mesh->mBitangents[i].z);
+
+            if (mesh->mTangents && mesh->mBitangents && !(mode & NO_TANGENTS)) {
+                glm::vec3 N = glm::normalize(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
+                glm::vec3 T = AssimpGLMHelpers::GetGLMVec(mesh->mTangents[i]);
+                glm::vec3 B = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
+
+                /*
+				// Ensure T is orthogonal to N.
+				// Sometimes assimp messes this up.
+
+				// Gram–Schmidt orthogonalize
+                T = glm::normalize(T - N * glm::dot(N, T));
+
+                // Calculate handedness (±1)
+                float handedness = (glm::dot(glm::cross(N, T), B) < 0.0f) ? -1.0f : 1.0f;
+
+                // Recompute B
+                B = glm::cross(N, T) * handedness;
+                */
+
+                vertex.Tangent = T;
+                vertex.Bitangent = B;
+            }
+            else {
+                vertex.Tangent = glm::vec3(0.0f);
+                vertex.Bitangent = glm::vec3(0.0f);
+            }
         }
         else {
             vertex.TexCoords = glm::vec2(0.0f);
+            vertex.Tangent = glm::vec3(0.0f);
+            vertex.Bitangent = glm::vec3(0.0f);
         }
+
         vertices.push_back(std::move(vertex));
     }
 
@@ -119,8 +145,15 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         auto diffuseMaps = loadMaterialTextures(scene, material, aiTextureType_DIFFUSE, Texture2D::Texture2DType::TextureDiffuse);
         auto specularMaps = loadMaterialTextures(scene, material, aiTextureType_SPECULAR, Texture2D::Texture2DType::TextureSpecular);
-        auto normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::Texture2DType::TextureNormal);
-        auto heightMaps = loadMaterialTextures(scene, material, aiTextureType_AMBIENT, Texture2D::Texture2DType::TextureHeight);
+
+        // Normal map heuristic
+        auto normalMaps = loadMaterialTextures(scene, material, aiTextureType_NORMALS, Texture2D::Texture2DType::TextureNormal);
+        if (normalMaps.empty()) {
+			// fallback: Some models use height maps as normal maps
+            normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::Texture2DType::TextureNormal);
+        }
+
+        auto heightMaps = loadMaterialTextures(scene, material, aiTextureType_DISPLACEMENT, Texture2D::Texture2DType::TextureHeight);
 
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());

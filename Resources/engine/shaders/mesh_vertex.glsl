@@ -10,9 +10,7 @@ layout (location = 6) in vec4 weights;
 out vec2 TexCoords;
 out vec3 Normal;
 out vec3 Position;
-out vec3 tangentPos;
-out vec3 tangentViewPos;
-out vec3 tangentLightPos;
+out vec3 vColor;
 out mat3 TBN;
 
 uniform mat4 model;
@@ -22,18 +20,17 @@ uniform vec3 viewPos;
 
 void main()
 {
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+
     TexCoords = aTexCoords;
-    Normal = aNormal;
+    Normal = normalize(normalMatrix * aNormal);
     Position = vec3(model * vec4(aPos, 1.0));
 
-    vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
-    vec3 B = normalize(vec3(model * vec4(aBitangent, 0.0)));
-    vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));
+    vec3 N = Normal;
+    vec3 T = normalize(normalMatrix * aTangent);
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
     TBN = transpose(mat3(T, B, N));
-
-    tangentLightPos = TBN * vec3(1.0, 1.7, 10.0);
-    tangentViewPos  = TBN * viewPos;
-    tangentPos      = TBN * Position;
 
     mat4 viewModel = view * model;
     gl_Position =  projection * view * model * vec4(aPos, 1.0);

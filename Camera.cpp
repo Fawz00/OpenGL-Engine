@@ -24,6 +24,8 @@ Camera::~Camera() {}
 void Camera::setAspectRatio(int width, int height) {
     if (height == 0) height = 1;
     aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+	projectionDirty = true;
 }
 
 // -------------------- Pivot --------------------

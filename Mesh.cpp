@@ -37,22 +37,22 @@ void Mesh::Draw(Shader& shader)
         if (texType == Texture2D::Texture2DType::TextureDiffuse) {
             name = "texture_diffuse";
             number = std::to_string(diffuseNr++);
-            flags |= Texture2D::HasDiffuse;
+            flags |= HasDiffuse;
         }
         else if (texType == Texture2D::Texture2DType::TextureSpecular) {
             name = "texture_specular";
             number = std::to_string(specularNr++);
-			flags |= Texture2D::HasSpecular;
+			flags |= HasSpecular;
         }
         else if (texType == Texture2D::Texture2DType::TextureNormal) {
             name = "texture_normal";
             number = std::to_string(normalNr++);
-			flags |= Texture2D::HasNormal;
+			flags |= HasNormal;
         }
         else if (texType == Texture2D::Texture2DType::TextureHeight) {
             name = "texture_height";
             number = std::to_string(heightNr++);
-			flags |= Texture2D::HasHeight;
+			flags |= HasHeight;
         }
         else {
             name = "texture_other";

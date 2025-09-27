@@ -2,25 +2,32 @@
 
 **Fawwaz Haryolukito Pambudi**
 
-This is a simple OpenGL engine implemented in C++. It provides basic functionality for rendering 3D graphics using OpenGL.
-I think this project is not basic anymore, but it's still a work in progress :)
+Note: I think this project is not basic anymore, but it's still a work in progress :)
+A modern OpenGL engine written in C++20, featuring window management, rendering, input handling, model and texture loading, event-driven architecture, GUI integration, and advanced graphics techniques.
 
 ## Features
 - Window creation and management using GLFW
 - OpenGL context initialization with GLAD
-- Basic shader management
+- Viewport resizing
+- Custom cursor support (or maybe not...)
 - Rendering loop with delta time calculation
-- Custom cursor support
+- Basic shader management
 - Input handling
 - EventBus system for event management
-- Viewport resizing
+- Event based logging system
 - Camera
 - Model loading with Assimp
 - Texture loading with stb_image
 - GUI integration with ImGUI
-- Basic lighting and materials
+- Basic lighting
+- Animations with Assimp
+- Skybox rendering
+- Normal mapping & specular mapping
+- Framebuffer object (FBO) support
 
 ## Requirements
+- Windows 10 x64 or higher
+- x64 architecture CPU
 - C++17 or higher (C++20 recommended)
 - GLFW
 - GLAD

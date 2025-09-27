@@ -11,7 +11,7 @@ namespace {
     }
 }
 
-Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type)
+Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type, bool genMipmap, FilterMode filter)
     : ID(0), width(0), height(0), channels(0), type(type)
 {
     stbi_set_flip_vertically_on_load(true);
@@ -27,30 +27,32 @@ Texture2D::Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType typ
     }
 
     GLenum format = pickFormat(channels);
-    uploadToGPU(data, format);
+    uploadToGPU(data, format, format, GL_UNSIGNED_BYTE, filter, genMipmap);
     stbi_image_free(data);
 }
 
-Texture2D::Texture2D(const uint8_t* data, int width, int height, int channels, Texture2DType type)
+Texture2D::Texture2D(const uint8_t* data, int width, int height, int channels, Texture2DType type, bool genMipmap, FilterMode filter)
     : ID(0), width(width), height(height), channels(channels), type(type)
 {
-    Debug::log("Creating texture from raw data: " +
-        std::to_string(width) + "x" + std::to_string(height) +
-        " with " + std::to_string(channels) + " channels");
-
     GLenum format = pickFormat(channels);
-    uploadToGPU(data, format);
+    uploadToGPU(data, format, format, GL_UNSIGNED_BYTE, filter, genMipmap);
 }
 
-Texture2D::Texture2D(const char* path, bool alpha, Texture2DType type)
+Texture2D::Texture2D(const uint8_t* data, int width, int height, Texture2DType type, bool genMipmap, GLenum internalFormat, GLenum dataFormat, GLenum dataType, FilterMode filter)
+    : ID(0), width(width), height(height), channels(0), type(type)
+{
+    uploadToGPU(data, internalFormat, dataFormat, dataType, filter, genMipmap);
+}
+
+Texture2D::Texture2D(const char* path, bool alpha, Texture2DType type, bool genMipmap, FilterMode filter)
     : width(0), height(0), channels(0), ID(0), type(type)
 {
     pathSource = std::string(path);
-    loadFromFile(path, alpha);
+    loadFromFile(path, alpha, filter, genMipmap);
 }
 
-Texture2D::Texture2D(const std::string& path, bool alpha, Texture2DType type)
-    : Texture2D(path.c_str(), alpha, type) {
+Texture2D::Texture2D(const std::string& path, bool alpha, Texture2DType type, bool genMipmap, FilterMode filter)
+    : Texture2D(path.c_str(), alpha, type, genMipmap, filter) {
 }
 
 Texture2D::~Texture2D() {
@@ -71,7 +73,7 @@ void Texture2D::unbind() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture2D::loadFromFile(const char* path, bool alpha) {
+void Texture2D::loadFromFile(const char* path, bool alpha, FilterMode filter, bool createMipmap) {
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* data = nullptr;
@@ -89,23 +91,29 @@ void Texture2D::loadFromFile(const char* path, bool alpha) {
     }
 
     GLenum format = pickFormat(channels);
-    uploadToGPU(data, format);
+    uploadToGPU(data, format, format, GL_UNSIGNED_BYTE, filter, createMipmap);
     stbi_image_free(data);
 }
 
-void Texture2D::uploadToGPU(const uint8_t* data, GLenum format) {
+void Texture2D::uploadToGPU(const uint8_t* data, GLenum internalFormat, GLenum dataFormat, GLenum dataType, FilterMode filter, bool createMipmap) {
+	useMipmap = createMipmap;
+	this->internalFormat = internalFormat;
+	this->dataFormat = dataFormat;
+	this->dataType = dataType;
+	this->filter = filter;
+
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
 
     // Wrapping & filtering
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, createMipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 
     // Upload
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, dataType, data);
+    if (createMipmap) glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }

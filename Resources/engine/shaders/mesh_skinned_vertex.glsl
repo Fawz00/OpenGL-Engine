@@ -10,15 +10,13 @@ layout (location = 6) in vec4 weights;
 out vec2 TexCoords;
 out vec3 Normal;
 out vec3 Position;
-out vec3 tangentPos;
-out vec3 tangentViewPos;
-out vec3 tangentLightPos;
+out vec3 vColor;
 out mat3 TBN;
+out mat3 TBN_transpose;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform vec3 viewPos;
 
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
@@ -57,17 +55,19 @@ void main()
         skinnedBitangent = aBitangent;
     }
 
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+
     Position = vec3(model * totalPosition);
-    Normal = normalize(mat3(model) * skinnedNormal);
+    Normal = normalize(normalMatrix * skinnedNormal);
 
-    vec3 T = normalize(mat3(model) * skinnedTangent);
-    vec3 B = normalize(mat3(model) * skinnedBitangent);
-    vec3 N = normalize(Normal);
+    vec3 N = Normal;
+    vec3 T = normalize(normalMatrix * skinnedTangent);
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
     TBN = transpose(mat3(T, B, N));
+    TBN_transpose = transpose(TBN);
 
-    tangentLightPos = TBN * vec3(1.0, 1.7, 10.0);
-    tangentViewPos  = TBN * viewPos;
-    tangentPos      = TBN * Position;
+    vColor = T;
 
     gl_Position = projection * view * vec4(Position, 1.0);
 }

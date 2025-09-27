@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include "stb_image.h"
 #include "I_Texture.hpp"
 
@@ -11,24 +12,23 @@ class Texture2D : public I_Texture {
 public:
 	enum Texture2DType {
 		TextureOther,
+		TextureRender,
 		TextureDiffuse,
 		TextureSpecular,
 		TextureNormal,
 		TextureHeight
 	};
-
-	enum Texture2DFlags : uint32_t {
-		HasDiffuse  = 1 << 0,
-		HasSpecular = 1 << 1,
-		HasNormal   = 1 << 2,
-		HasHeight   = 1 << 3,
+	enum FilterMode {
+		FilterNearest = GL_NEAREST,
+		FilterLinear = GL_LINEAR
 	};
 
 	// Constructors
-	Texture2D(const std::string& path, bool alpha = false, Texture2DType type = TextureOther);
-	Texture2D(const char* path, bool alpha = false, Texture2DType type = TextureOther);
-	Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type);
-	Texture2D(const uint8_t* data, int width, int height, int channels = 4, Texture2DType type = TextureOther);
+	Texture2D(const std::string& path, bool alpha = false, Texture2DType type = TextureOther, bool genMipmap = false, FilterMode filter = FilterLinear);
+	Texture2D(const char* path, bool alpha = false, Texture2DType type = TextureOther, bool genMipmap = false, FilterMode filter = FilterLinear);
+	Texture2D(const uint8_t* buffer, size_t bufferSize, Texture2DType type = TextureOther, bool genMipmap = false, FilterMode filter = FilterLinear);
+	Texture2D(const uint8_t* data, int width, int height, int channels, Texture2DType type = TextureOther, bool genMipmap = false, FilterMode filter = FilterLinear);
+	Texture2D(const uint8_t* data, int width, int height, Texture2DType type = TextureOther, bool genMipmap = false, GLenum internalFormat = GL_RGB, GLenum dataFormat = GL_RGB, GLenum dataType = GL_UNSIGNED_BYTE, FilterMode filter = FilterLinear);
 
 	~Texture2D();
 	
@@ -38,18 +38,33 @@ public:
 	inline int getWidth() const { return width; }
 	inline int getHeight() const { return height; }
 	inline int getSize() const { return width * height * channels; }
-	inline unsigned int getId() const { return ID; }
+	inline unsigned int getId() const
+	{
+		if (ID == 0)
+			Debug::logWarn("Texture not created properly, ID is 0.");
+		return ID;
+	}
 	inline Texture2DType getType() const { return type; }
 	void setPath(const std::string& path) { pathSource = path; }
 	inline std::string getPath() const { return pathSource; }
+	inline GLenum getInternalFormat() const { return internalFormat; }
+	inline GLenum getDataFormat() const { return dataFormat; }
+	inline FilterMode getFilter() const { return filter; }
+	inline GLenum getDataType() const { return dataType; }
+	inline bool hasMipmap() const { return useMipmap; }
 
 private:
 	unsigned int ID;
 	int width, height, channels;
+	GLenum internalFormat = GL_RGB;
+	GLenum dataFormat = GL_RGB;
+	GLenum dataType = GL_UNSIGNED_BYTE;
+	FilterMode filter = FilterLinear;
+	bool useMipmap = false;
 	Texture2DType type;
 	std::string pathSource;
 
 	// Helpers
-	void loadFromFile(const char* path, bool alpha);
-	void uploadToGPU(const uint8_t* data, GLenum format);
+	void loadFromFile(const char* path, bool alpha, FilterMode filter = FilterLinear, bool createMipmap = false);
+	void uploadToGPU(const uint8_t* data, GLenum internalFormat, GLenum dataFormat, GLenum dataType = GL_UNSIGNED_BYTE, FilterMode filter = FilterLinear, bool createMipmap = false);
 };
