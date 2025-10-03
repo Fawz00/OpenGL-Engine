@@ -78,5 +78,14 @@ int main()
 	ImGuiWindow::shutdown();
 	Input::destroy();
     Window::destroy();
+
+	/*
+		Known error code on exit :
+		- 0xc0000409 : Stack buffer overrun
+			Probably due to some destructors being called in the wrong order on exit.
+			Possibly related to static variables in multiple translation units.
+			Or related to shader errors not being properly handled.
+	*/
+
     return 0;
 }

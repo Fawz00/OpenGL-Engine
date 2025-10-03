@@ -8,7 +8,7 @@ Model::Model(string const& path, ModelMode mode, bool gamma)
     loadModel(path);
 }
 
-void Model::Draw(Shader& shader)
+void Model::draw(Shader& shader)
 {
     for (auto& mesh : meshes) {
         mesh->Draw(shader);
@@ -68,7 +68,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         Vertex vertex;
 		
         if (mode & SKINNED) {
-            SetVertexBoneDataToDefault(vertex);
+            setVertexBoneDataToDefault(vertex);
 		}
 
         vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
@@ -163,7 +163,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 	// --- Bones ---
     if (mode & SKINNED) {
-        ExtractBoneWeightForVertices(vertices, mesh, scene);
+        extractBoneWeightForVertices(vertices, mesh, scene);
 	}
 
     // --- Submeshes ---
@@ -244,7 +244,7 @@ vector<Texture2D*> Model::loadMaterialTextures(
     return textures;
 }
 
-void Model::SetVertexBoneDataToDefault(Vertex& vertex)
+void Model::setVertexBoneDataToDefault(Vertex& vertex)
 {
     for (int i = 0; i < MAX_BONE_INFLUENCE; i++)
     {
@@ -253,7 +253,7 @@ void Model::SetVertexBoneDataToDefault(Vertex& vertex)
     }
 }
 
-void Model::SetVertexBoneData(Vertex& vertex, int boneID, float weight)
+void Model::setVertexBoneData(Vertex& vertex, int boneID, float weight)
 {
     for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
     {
@@ -266,7 +266,7 @@ void Model::SetVertexBoneData(Vertex& vertex, int boneID, float weight)
     }
 }
 
-void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
+void Model::extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
 {
     auto& boneInfoMap = m_BoneInfoMap;
     int& boneCount = m_BoneCounter;
@@ -297,7 +297,7 @@ void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* 
             int vertexId = weights[weightIndex].mVertexId;
             float weight = weights[weightIndex].mWeight;
             assert(vertexId <= vertices.size());
-            SetVertexBoneData(vertices[vertexId], boneID, weight);
+            setVertexBoneData(vertices[vertexId], boneID, weight);
         }
     }
 }

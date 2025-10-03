@@ -141,6 +141,7 @@ Texture2D* RenderTexture::getDepthTexture() const
 void RenderTexture::bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glViewport(0, 0, width, height);
     glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

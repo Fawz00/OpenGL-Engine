@@ -36,7 +36,7 @@ class Model
 public:
     enum ModelMode : uint32_t {
 		NONE            = 0,
-        SKINNED        = 1 << 0,
+        SKINNED         = 1 << 0,
 		NO_TEXTURES     = 1 << 1,
 		NO_TANGENTS     = 1 << 2,
 		FORCE_TRIANGLES = 1 << 3,
@@ -54,12 +54,13 @@ public:
     Model(Model&&) noexcept = default;
     Model& operator=(Model&&) noexcept = default;
 
-    void Draw(Shader& shader);
+    void draw(Shader& shader);
 
     // Getters
-    auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-    int& GetBoneCount() { return m_BoneCounter; }
-    const std::string& GetPath() const { return directory; }
+    auto& getBoneInfoMap() { return m_BoneInfoMap; }
+    int& getBoneCount() { return m_BoneCounter; }
+    const std::string& getPath() const { return directory; }
+	uint32_t getMode() const { return mode; }
 
 private:
     // Model data
@@ -82,7 +83,7 @@ private:
     std::vector<Texture2D*> loadMaterialTextures(const aiScene* scene, aiMaterial* mat, aiTextureType type, Texture2D::Texture2DType texType);
 
 	// helper functions
-    void SetVertexBoneDataToDefault(Vertex& vertex);
-    void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
-    void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+    void setVertexBoneDataToDefault(Vertex& vertex);
+    void setVertexBoneData(Vertex& vertex, int boneID, float weight);
+    void extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
 };

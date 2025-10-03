@@ -7,7 +7,7 @@ Animator::Animator(Animation* animation)
 {
 	// If animation is valid, resize final matrices to match number of bones
 	if (animation) {
-		m_FinalBoneMatrices.resize(animation->GetBoneIDMap().size(), glm::mat4(1.0f));
+		m_FinalBoneMatrices.resize(animation->getBoneIDMap().size(), glm::mat4(1.0f));
 	}
 	else {
 		m_FinalBoneMatrices.resize(100, glm::mat4(1.0f)); // fallback default
@@ -26,15 +26,15 @@ Animator::~Animator() {
 	glDeleteBuffers(1, &m_BonesUBO);
 }
 
-void Animator::UpdateAnimation(Shader* shader) {
+void Animator::updateAnimation(Shader* shader) {
 	m_DeltaTime = Time::getLastDeltaTime();
 
 	if (m_CurrentAnimation) {
-		m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * m_DeltaTime;
-		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
+		m_CurrentTime += m_CurrentAnimation->getTicksPerSecond() * m_DeltaTime;
+		m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->getDuration());
 
 		// Recursive update
-		CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
+		calculateBoneTransform(&m_CurrentAnimation->getRootNode(), glm::mat4(1.0f));
 	}
 
 	// Update shader with final bone matrices
@@ -47,19 +47,19 @@ void Animator::UpdateAnimation(Shader* shader) {
 		glUniformBlockBinding(shader->getID(), blockIndex, m_BindingPoint);
 }
 
-void Animator::PlayAnimation(Animation* animation) {
+void Animator::playAnimation(Animation* animation) {
 	m_CurrentAnimation = animation;
 	m_CurrentTime = 0.0f;
 
 	if (animation) {
-		m_FinalBoneMatrices.assign(animation->GetBoneIDMap().size(), glm::mat4(1.0f));
+		m_FinalBoneMatrices.assign(animation->getBoneIDMap().size(), glm::mat4(1.0f));
 	}
 }
 
-void Animator::CalculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform) {
+void Animator::calculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform) {
 	glm::mat4 nodeTransform = node->transformation;
 
-	Bone* bone = m_CurrentAnimation->FindBone(node->name);
+	Bone* bone = m_CurrentAnimation->findBone(node->name);
 	if (bone) {
 		bone->Update(m_CurrentTime);
 		nodeTransform = bone->GetLocalTransform();
@@ -67,7 +67,7 @@ void Animator::CalculateBoneTransform(const AssimpNodeData* node, const glm::mat
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
 
-	const auto& boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+	const auto& boneInfoMap = m_CurrentAnimation->getBoneIDMap();
 	auto it = boneInfoMap.find(node->name);
 	if (it != boneInfoMap.end()) {
 		int index = it->second.id;
@@ -78,6 +78,6 @@ void Animator::CalculateBoneTransform(const AssimpNodeData* node, const glm::mat
 	}
 
 	for (int i = 0; i < node->childrenCount; i++) {
-		CalculateBoneTransform(&node->children[i], globalTransform);
+		calculateBoneTransform(&node->children[i], globalTransform);
 	}
 }

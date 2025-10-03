@@ -16,16 +16,16 @@ public:
     explicit Animator(Animation* animation);
 	~Animator();
 
-    void UpdateAnimation(Shader* shader);
-    void PlayAnimation(Animation* animation);
+    void updateAnimation(Shader* shader);
+    void playAnimation(Animation* animation);
 
 	// No copy
-    inline const std::vector<glm::mat4>& GetFinalBoneMatrices() const noexcept {
+    inline const std::vector<glm::mat4>& getFinalBoneMatrices() const noexcept {
         return m_FinalBoneMatrices;
     }
 
 private:
-    void CalculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform);
+    void calculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform);
 
     std::vector<glm::mat4> m_FinalBoneMatrices;
     Animation* m_CurrentAnimation{ nullptr };

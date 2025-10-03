@@ -26,6 +26,7 @@ class EngineRenderer {
 		static inline TextureCubeMap* skybox = nullptr;
 
 		static inline RenderTexture* renderTexture = nullptr;
+		static inline RenderTexture* shadowMap = nullptr;
 		
 		static inline std::vector<Model*> models;
 		static inline std::vector<glm::mat4> modelMatrices;
@@ -33,7 +34,9 @@ class EngineRenderer {
 		static inline Shader* skyboxShader = nullptr;
 		static inline Shader* shader = nullptr;
 		static inline Shader* quadShader = nullptr;
+
 		static inline Camera* camera = nullptr;
+		static inline Camera* lightCamera = nullptr;
 
 		static void onInit();
 		static void onWindowResize();

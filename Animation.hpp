@@ -30,18 +30,18 @@ public:
     Animation(Animation&&) noexcept = default;
     Animation& operator=(Animation&&) noexcept = default;
 
-    Bone* FindBone(const std::string& name);
+    Bone* findBone(const std::string& name);
 
-    inline float GetTicksPerSecond() const { return m_TicksPerSecond; }
-    inline float GetDuration() const { return m_Duration; }
-    inline const AssimpNodeData& GetRootNode() const { return m_RootNode; }
-    inline const std::unordered_map<std::string, BoneInfo>& GetBoneIDMap() const {
+    inline float getTicksPerSecond() const { return m_TicksPerSecond; }
+    inline float getDuration() const { return m_Duration; }
+    inline const AssimpNodeData& getRootNode() const { return m_RootNode; }
+    inline const std::unordered_map<std::string, BoneInfo>& getBoneIDMap() const {
         return m_BoneInfoMap;
     }
 
 private:
-    void ReadMissingBones(const aiAnimation* animation, Model& model);
-    void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
+    void readMissingBones(const aiAnimation* animation, Model& model);
+    void readHierarchyData(AssimpNodeData& dest, const aiNode* src);
 
     float m_Duration = 0.0f;
     float m_TicksPerSecond = 0.0f;

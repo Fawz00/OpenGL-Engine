@@ -10,13 +10,17 @@ layout (location = 6) in vec4 weights;
 out vec2 TexCoords;
 out vec3 Normal;
 out vec3 Position;
-out vec3 vColor;
+out vec4 vColor;
 out mat3 TBN;
 out mat3 TBN_transpose;
+
+out vec4 FragPosLightSpace;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+
+uniform mat4 lightSpaceMatrix;
 
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
@@ -67,7 +71,8 @@ void main()
     TBN = transpose(mat3(T, B, N));
     TBN_transpose = transpose(TBN);
 
-    vColor = T;
+    vColor = weights;
 
+    FragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
     gl_Position = projection * view * vec4(Position, 1.0);
 }

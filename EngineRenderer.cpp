@@ -6,7 +6,9 @@ void EngineRenderer::onInit() {
 	renderTexture = new RenderTexture(Window::width(), Window::height());
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
-	renderTexture->resize(Window::width(), Window::height());
+
+	shadowMap = new RenderTexture(2048, 2048);
+	shadowMap->useDepthTexture(GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
 
 	// Models and their matrices
 	models.push_back(new Model("Resources/engine/models/cube.obj"));
@@ -15,7 +17,7 @@ void EngineRenderer::onInit() {
 
 	models.push_back(new Model("Resources/engine/models/backpack/backpack.obj"));
 	glm::mat4 mat2 = glm::mat4(1.0f);
-	mat2 = glm::translate(mat2, glm::vec3(0.0f, 0.0f, 3.0f));
+	mat2 = glm::translate(mat2, glm::vec3(0.0f, -0.5f, 3.0f));
 	mat2 = glm::scale(mat2, glm::vec3(0.3f));
 	modelMatrices.push_back(mat2);
 
@@ -54,9 +56,16 @@ void EngineRenderer::onInit() {
 	camera = new Camera();
 	camera->setPivotDistance(0.01f); // FPS style camera
 	camera->setRotation(0.0f, 0.0f, 0.0f);
-	camera->setPerspective( 70.0f, 0.1f, 1000.0f);
+	camera->setPerspective( 70.0f, 0.1f, 10000.0f);
 	camera->setAspectRatio(Window::width(), Window::height());
 	camera->setRotationMode(Camera::ROTATION_LIMITED);
+
+	lightCamera = new Camera();
+	lightCamera->setPivotDistance(1.0f);
+	lightCamera->setRotation(-45.0f, -45.0f, 0.0f);
+	lightCamera->setOrthographic(10.0f, -10.0f, 10.0f);
+	lightCamera->setAspectRatio(1, 1);
+	lightCamera->setRotationMode(Camera::ROTATION_FREE);
 
 	Window::showCursor(false);
 }
@@ -97,6 +106,34 @@ void EngineRenderer::onUpdate() {
 		camera->setPivotPosition( camera->getPivotPosition() + glm::vec3(0.0f, 1.0f, 0.0f) * Time::getLastDeltaTime() * 2.0f);
 	}
 
+	lightCamera->setPivotPosition(camera->getPivotPosition());
+
+	// SHADOW PASS
+	shadowMap->bind();
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
+	shader->use();
+	float lightProjection[16];
+	lightCamera->getProjectionMatrix(lightProjection);
+	shader->setMat4("projection", lightProjection);
+	float lightView[16];
+	lightCamera->getViewMatrix(lightView);
+	shader->setMat4("view", lightView);
+	for (int i = 1; i < models.size(); i++) {
+		Model* m = models[i];
+		glm::mat4 modelMatrix = modelMatrices[i];
+		shader->setMat4("model", glm::value_ptr(modelMatrix));
+		m->draw(*shader);
+	}
+	shader->stop();
+
+	shadowMap->unbind();
+
+
+
+	// MAIN RENDER PASS
 	renderTexture->bind();
 
 	// Render skybox first
@@ -118,7 +155,7 @@ void EngineRenderer::onUpdate() {
 	skybox->bind(0);
 	skyboxShader->setInt("skybox", 0);
 
-	models[0]->Draw(*skyboxShader);
+	models[0]->draw(*skyboxShader);
 	skyboxShader->stop();
 
 
@@ -133,8 +170,6 @@ void EngineRenderer::onUpdate() {
 
 	shader->use();
 
-	animator->UpdateAnimation(shader);
-
 	shader->setFloat("time", Time::getTime());
 
 	float cmProjection[16];
@@ -148,11 +183,24 @@ void EngineRenderer::onUpdate() {
 	shader->setVec3("viewPos", camera->getWorldPosition());
 	shader->setVec3("lightDir", glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f)));
 
+	shadowMap->getDepthTexture()->bind(8);
+	shader->setInt("shadowMap", 8);
+
+	float lightSpaceMatrix[16];
+	lightCamera->getProjectionMatrix(lightSpaceMatrix);
+	float lightViewMatrix[16];
+	lightCamera->getViewMatrix(lightViewMatrix);
+	glm::mat4 lightSpace = glm::make_mat4(lightSpaceMatrix) * glm::make_mat4(lightViewMatrix);
+	shader->setMat4("lightSpaceMatrix", glm::value_ptr(lightSpace));
+
 	for (int i = 1; i < models.size(); i++) {
+		if ((models[i]->getMode() & Model::ModelMode::SKINNED) == Model::ModelMode::SKINNED) {
+			animator->updateAnimation(shader);
+		}
 		Model* m = models[i];
 		glm::mat4 modelMatrix = modelMatrices[i];
 		shader->setMat4("model", glm::value_ptr(modelMatrix));
-		m->Draw(*shader);
+		m->draw(*shader);
 	}
 
     shader->stop();
@@ -162,6 +210,7 @@ void EngineRenderer::onUpdate() {
 	// Render screen quad
 	quadShader->use();
 	renderTexture->getColorAttachments()[0].texture->bind(0);
+	//shadowMap->getDepthTexture()->bind(0);
 	shader->setInt("TextureColor", 0);
 	ScreenQuad::draw();
 	quadShader->stop();
@@ -184,5 +233,6 @@ void EngineRenderer::onDestroy() {
 	delete animator;
 
 	delete renderTexture;
+	delete shadowMap;
 	ScreenQuad::destroy();
 }

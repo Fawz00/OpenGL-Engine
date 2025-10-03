@@ -26,20 +26,20 @@ Animation::Animation(const std::string& animationPath, Model* model) {
         : 25.0f; // fallback
 
     m_Bones.reserve(animation->mNumChannels);
-    ReadHierarchyData(m_RootNode, scene->mRootNode);
-    ReadMissingBones(animation, *model);
+    readHierarchyData(m_RootNode, scene->mRootNode);
+    readMissingBones(animation, *model);
 }
 
-Bone* Animation::FindBone(const std::string& name) {
+Bone* Animation::findBone(const std::string& name) {
     auto it = std::find_if(m_Bones.begin(), m_Bones.end(),
         [&](const Bone& bone) { return bone.GetBoneName() == name; });
 
     return (it != m_Bones.end()) ? &(*it) : nullptr;
 }
 
-void Animation::ReadMissingBones(const aiAnimation* animation, Model& model) {
-    auto& boneInfoMap = model.GetBoneInfoMap();
-    int& boneCount = model.GetBoneCount();
+void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
+    auto& boneInfoMap = model.getBoneInfoMap();
+    int& boneCount = model.getBoneCount();
 
     for (unsigned int i = 0; i < animation->mNumChannels; ++i) {
         aiNodeAnim* channel = animation->mChannels[i];
@@ -58,7 +58,7 @@ void Animation::ReadMissingBones(const aiAnimation* animation, Model& model) {
     m_BoneInfoMap = boneInfoMap;
 }
 
-void Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src) {
+void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src) {
     if (!src) return;
 
     dest.name = src->mName.C_Str();
@@ -68,7 +68,7 @@ void Animation::ReadHierarchyData(AssimpNodeData& dest, const aiNode* src) {
 
     for (unsigned int i = 0; i < src->mNumChildren; ++i) {
         AssimpNodeData child;
-        ReadHierarchyData(child, src->mChildren[i]);
+        readHierarchyData(child, src->mChildren[i]);
         dest.children.push_back(std::move(child));
     }
 }
