@@ -8,6 +8,7 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
+#include "AnimationRetarget.hpp"
 #include "Bone.hpp"
 #include "Model.hpp"
 
@@ -21,7 +22,7 @@ struct AssimpNodeData {
 class Animation {
 public:
     Animation() = default;
-    Animation(const std::string& animationPath, Model* model);
+    Animation(const std::string& animationPath, Model* model, AnimationRetarget* retarget = nullptr);
     ~Animation() = default;
 
     // No copy, only move
@@ -41,7 +42,7 @@ public:
 
 private:
     void readMissingBones(const aiAnimation* animation, Model& model);
-    void readHierarchyData(AssimpNodeData& dest, const aiNode* src);
+    void readHierarchyData(AssimpNodeData& dest, const aiNode* src, const std::string& parentName = "");
 
     float m_Duration = 0.0f;
     float m_TicksPerSecond = 0.0f;
@@ -49,4 +50,7 @@ private:
     std::vector<Bone> m_Bones;
     AssimpNodeData m_RootNode;
     std::unordered_map<std::string, BoneInfo> m_BoneInfoMap;
+    std::unordered_map<std::string, std::string> m_NodeParentMap;
+
+	AnimationRetarget* m_Retarget = nullptr;
 };

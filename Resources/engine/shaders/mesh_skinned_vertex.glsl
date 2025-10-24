@@ -71,7 +71,7 @@ void main()
     TBN = transpose(mat3(T, B, N));
     TBN_transpose = transpose(TBN);
 
-    vColor = weights;
+    vColor = totalPosition;
 
     FragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
     gl_Position = projection * view * vec4(Position, 1.0);

@@ -3,7 +3,12 @@
 
 // Interfce for texture classes
 class I_Texture {
-	public:
+public:
+	enum FilterMode {
+		FilterNearest = GL_NEAREST,
+		FilterLinear = GL_LINEAR
+	};
+
 	virtual ~I_Texture() = default;
 	virtual void bind(unsigned int slot = 0) const = 0;
 	static void unbind() {}

@@ -1,44 +1,45 @@
 #include "Shader.hpp"
 
-std::string Shader::loadShaderSource(const std::string& filePath) {
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open shader file: " + filePath);
+Shader::~Shader() {
+    if (program != 0) {
+        glDeleteProgram(program);
+        program = 0;
     }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
 }
 
-GLuint Shader::compileShader(const std::string& source, const std::string& path, GLenum type) {
-    GLuint shader = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(shader, 1, &src, nullptr);
-    glCompileShader(shader);
-
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        Debug::logError("Shader compilation error:\n" + std::string(infoLog) + "\nShader source path: " + path);
-        throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
-    }
-    return shader;
+Shader& Shader::attachShader(ShaderType type, const std::string& path, std::initializer_list<std::string> defines) {
+    ShaderStage stage(type, path);
+    for (auto& d : defines)
+        stage.define(d);
+    stages.push_back(stage);
+    return *this;
 }
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
-    std::string vertexCode = loadShaderSource(vertexPath);
-    std::string fragmentCode = loadShaderSource(fragmentPath);
+Shader& Shader::define(const std::string& macro) {
+    globalDefines.push_back(macro);
+    return *this;
+}
 
-    GLuint vertexShader = compileShader(vertexCode, vertexPath, GL_VERTEX_SHADER);
-    GLuint fragmentShader = compileShader(fragmentCode, fragmentPath, GL_FRAGMENT_SHADER);
+Shader& Shader::link() {
+	std::vector<GLint> compiledShaderIds;
+
+    for (auto& stage : stages) {
+		// Add global defines to each stage
+        for (auto& gd : globalDefines)
+            stage.define(gd);
+
+		GLint shader = stage.compile();
+
+		compiledShaderIds.push_back(shader);
+    }
 
     program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
+    for (auto& shaderId : compiledShaderIds) {
+        glAttachShader(program, shaderId);
+	}
     glLinkProgram(program);
 
+	// Check for linking errors
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
@@ -47,23 +48,26 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
         throw std::runtime_error("Program linking failed: " + std::string(infoLog));
     }
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+	// Cleanup compiled shaders
+    for (auto& shaderId : compiledShaderIds) {
+        glDetachShader(program, shaderId);
+        glDeleteShader(shaderId);
+	}
+
+    linked = true;
+    return *this;
 }
 
-void Shader::use() {
+void Shader::bind() {
+    if (!linked) {
+		Debug::logError("Attempted to bind unlinked shader program.");
+        return;
+    }
     glUseProgram(program);
 }
 
-void Shader::stop() {
+void Shader::unbind() {
     glUseProgram(0);
-}
-
-Shader::~Shader() {
-    if (program != 0) {
-        glDeleteProgram(program);
-        program = 0;
-    }
 }
 
 GLint Shader::genAttrId(const std::string& name) {

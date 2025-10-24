@@ -271,32 +271,31 @@ void Model::extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* 
     auto& boneInfoMap = m_BoneInfoMap;
     int& boneCount = m_BoneCounter;
 
-    for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
+    for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
     {
+        const aiBone* aiBone = mesh->mBones[boneIndex];
+        std::string boneName = aiBone->mName.C_Str();
         int boneID = -1;
-        std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
-        if (boneInfoMap.find(boneName) == boneInfoMap.end())
-        {
-            BoneInfo newBoneInfo;
-            newBoneInfo.id = boneCount;
-            newBoneInfo.offset = AssimpGLMHelpers::ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
-            boneInfoMap[boneName] = newBoneInfo;
-            boneID = boneCount;
-            boneCount++;
-        }
-        else
-        {
-            boneID = boneInfoMap[boneName].id;
-        }
-        assert(boneID != -1);
-        auto weights = mesh->mBones[boneIndex]->mWeights;
-        int numWeights = mesh->mBones[boneIndex]->mNumWeights;
 
-        for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+        auto [it, inserted] = boneInfoMap.try_emplace(
+            boneName,
+            BoneInfo{ boneCount, AssimpGLMHelpers::ConvertMatrixToGLMFormat(aiBone->mOffsetMatrix) }
+        );
+
+        if (inserted)
+            boneID = boneCount++;
+        else
+            boneID = it->second.id;
+
+        if (aiBone->mNumWeights == 0)
+            continue;
+
+        assert(boneID >= 0);
+        for (unsigned int weightIndex = 0; weightIndex < aiBone->mNumWeights; ++weightIndex)
         {
-            int vertexId = weights[weightIndex].mVertexId;
-            float weight = weights[weightIndex].mWeight;
-            assert(vertexId <= vertices.size());
+            unsigned int vertexId = aiBone->mWeights[weightIndex].mVertexId;
+            float weight = aiBone->mWeights[weightIndex].mWeight;
+            assert(vertexId < vertices.size());
             setVertexBoneData(vertices[vertexId], boneID, weight);
         }
     }

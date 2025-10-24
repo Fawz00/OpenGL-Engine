@@ -5,9 +5,13 @@
 #include <cassert>
 #include <algorithm>
 
-Animation::Animation(const std::string& animationPath, Model* model) {
+Animation::Animation(const std::string& animationPath, Model* model, AnimationRetarget* retarget)
+    : m_Retarget(retarget)
+    {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
+    const aiScene* scene = importer.ReadFile(animationPath,
+        aiProcess_Triangulate
+    );
 
     if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode) {
         Debug::logError("ERROR::ASSIMP:: " + std::string(importer.GetErrorString()));
@@ -43,10 +47,31 @@ void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
 
     for (unsigned int i = 0; i < animation->mNumChannels; ++i) {
         aiNodeAnim* channel = animation->mChannels[i];
-        std::string boneName(channel->mNodeName.data);
+        std::string sourceBoneName(channel->mNodeName.data);
+        std::string boneName = sourceBoneName;
 
-		// Add new bone to the map if it doesn't exist
+        // Apply retarget mapping
+        if (m_Retarget) {
+            std::string targetBone = m_Retarget->mapBoneName(sourceBoneName);
+            if (!targetBone.empty()) {
+                boneName = targetBone;
+            }
+            else {
+                Debug::logWarn("ANIMATION: Skipping bone (not in retarget map): " + sourceBoneName);
+                continue; // strict mode
+            }
+        }
+
+        // If the bone is not in the model, add it
         if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
+            std::string fallbackParent = m_NodeParentMap[sourceBoneName]; // try original name first
+            while (!fallbackParent.empty() && boneInfoMap.find(fallbackParent) == boneInfoMap.end()) {
+                fallbackParent = m_NodeParentMap[fallbackParent];
+            }
+
+            Debug::logWarn("ANIMATION: Bone " + boneName +
+                " not found in model. Adding it with fallback parent " + fallbackParent);
+
             boneInfoMap[boneName].id = boneCount++;
             boneInfoMap[boneName].offset = glm::mat4(1.0f);
         }
@@ -58,17 +83,35 @@ void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
     m_BoneInfoMap = boneInfoMap;
 }
 
-void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src) {
+void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src, const std::string& parentName) {
     if (!src) return;
 
-    dest.name = src->mName.C_Str();
+    std::string sourceName = src->mName.C_Str();
+    std::string nodeName = sourceName;
+
+    // Apply retarget mapping: source -> target
+    if (m_Retarget) {
+        std::string mappedName = m_Retarget->mapBoneName(sourceName); // source -> target
+        if (!mappedName.empty()) {
+            nodeName = mappedName;
+        }
+    }
+
+    dest.name = nodeName;
     dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
     dest.childrenCount = static_cast<int>(src->mNumChildren);
     dest.children.reserve(src->mNumChildren);
 
+	// Record parent mapping
+    std::string mappedParent = parentName;
+    if (!parentName.empty()) {
+        mappedParent = m_NodeParentMap[parentName];
+    }
+    m_NodeParentMap[nodeName] = mappedParent;
+
     for (unsigned int i = 0; i < src->mNumChildren; ++i) {
         AssimpNodeData child;
-        readHierarchyData(child, src->mChildren[i]);
+        readHierarchyData(child, src->mChildren[i], nodeName);
         dest.children.push_back(std::move(child));
     }
 }

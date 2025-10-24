@@ -16,7 +16,7 @@ public:
     explicit Animator(Animation* animation);
 	~Animator();
 
-    void updateAnimation(Shader* shader);
+    void updateAnimation(Shader& shader);
     void playAnimation(Animation* animation);
 
 	// No copy

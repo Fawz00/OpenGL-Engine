@@ -29,7 +29,7 @@ public:
     ~RenderTexture();
 
     void addColorAttachment(GLenum internalFormat = GL_RGB, GLenum dataFormat = GL_RGB, GLenum dataType = GL_UNSIGNED_BYTE, Texture2D::FilterMode filter = Texture2D::FilterNearest, bool generateMipmap = false);
-	void useDepthTexture(GLenum depthInternalFormat = GL_DEPTH_COMPONENT24, GLenum depthDataFormat = GL_DEPTH_COMPONENT, GLenum depthDataType = GL_UNSIGNED_BYTE);
+	void useDepthTexture(Texture2D::FilterMode filter = Texture2D::FilterNearest, GLenum depthInternalFormat = GL_DEPTH_COMPONENT24, GLenum depthDataFormat = GL_DEPTH_COMPONENT, GLenum depthDataType = GL_UNSIGNED_BYTE);
     void useDepthRBO();
 
     void bind();

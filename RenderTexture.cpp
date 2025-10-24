@@ -39,7 +39,7 @@ void RenderTexture::addColorAttachment(GLenum internalFormat, GLenum dataFormat,
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderTexture::useDepthTexture(GLenum depthInternalFormat, GLenum depthDataFormat, GLenum depthDataType)
+void RenderTexture::useDepthTexture(Texture2D::FilterMode filter, GLenum depthInternalFormat, GLenum depthDataFormat, GLenum depthDataType)
 {
 	if (RBO) {
 		Debug::logWarn("useDepthTexture: Depth RBO already exists, destroying it.");
@@ -49,7 +49,7 @@ void RenderTexture::useDepthTexture(GLenum depthInternalFormat, GLenum depthData
 
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-    depth = std::make_unique<Texture2D>(nullptr, width, height, Texture2D::TextureRender, false, depthInternalFormat, depthDataFormat, depthDataType, Texture2D::FilterNearest);
+    depth = std::make_unique<Texture2D>(nullptr, width, height, Texture2D::TextureRender, false, depthInternalFormat, depthDataFormat, depthDataType, filter);
 	depth->bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth->getId(), 0);
 

@@ -18,10 +18,6 @@ public:
 		TextureNormal,
 		TextureHeight
 	};
-	enum FilterMode {
-		FilterNearest = GL_NEAREST,
-		FilterLinear = GL_LINEAR
-	};
 
 	// Constructors
 	Texture2D(const std::string& path, bool alpha = false, Texture2DType type = TextureOther, bool genMipmap = false, FilterMode filter = FilterLinear);

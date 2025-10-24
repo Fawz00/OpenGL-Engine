@@ -1,30 +1,33 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
+#include <vector>
+#include <gtc/type_ptr.hpp>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
+#include "ShaderStage.hpp"
 #include "Debug.hpp"
 
 class Shader {
 private:
-    GLuint program;
+    GLuint program = 0;
 
-    static std::string loadShaderSource(const std::string& filePath);
-    static GLuint compileShader(const std::string& source, const std::string& path, GLenum type);
+    bool linked;
+    std::vector<ShaderStage> stages;
+    std::vector<std::string> globalDefines;
 
 public:
-    Shader(const std::string& vertexPath, const std::string& fragmentPath);
-    void use();
-    static void stop();
-    ~Shader();
+    Shader() : program(0), linked(false) { } // Also initialize in constructor
+	~Shader();
+
+    Shader& attachShader(ShaderType type, const std::string& path, std::initializer_list<std::string> defines = {});
+    Shader& define(const std::string& macro);
+
+    Shader& link();
+
+    void bind();
+    static void unbind();
 
     GLint genAttrId(const std::string& name);
     static void setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type = GL_FLOAT);

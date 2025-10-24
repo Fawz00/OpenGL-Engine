@@ -133,6 +133,12 @@
     <ClCompile Include="Actor.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="AnimationRetarget.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderStage.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -245,6 +251,12 @@
     </ClInclude>
     <ClInclude Include="Actor.hpp">
       <Filter>Source Files\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationRetarget.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderStage.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@ class EngineRenderer {
 		~EngineRenderer() = default;
 
 		static inline Animation* danceAnimation= nullptr;
+		static inline AnimationRetarget* mixamoRetarget = nullptr;
 		static inline Animator* animator= nullptr;
 
 		static inline TextureCubeMap* skybox = nullptr;
@@ -31,9 +32,10 @@ class EngineRenderer {
 		static inline std::vector<Model*> models;
 		static inline std::vector<glm::mat4> modelMatrices;
 
-		static inline Shader* skyboxShader = nullptr;
-		static inline Shader* shader = nullptr;
-		static inline Shader* quadShader = nullptr;
+		static inline Shader skyboxShader;
+		static inline Shader shader;
+		static inline Shader quadShader;
+		static inline Shader shadowShader;
 
 		static inline Camera* camera = nullptr;
 		static inline Camera* lightCamera = nullptr;

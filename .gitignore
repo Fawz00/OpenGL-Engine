@@ -10,9 +10,6 @@
 *.userosscache
 *.sln.docstates
 
-# Unused files
-Resources/models/
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

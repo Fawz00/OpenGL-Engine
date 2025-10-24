@@ -1,4 +1,6 @@
 #version 330 core
+#define PREDEFINED_MACRO
+#line 3
 
 out vec4 FragColor;
 
@@ -19,9 +21,9 @@ uniform sampler2D texture_height1;
 uniform sampler2D shadowMap;
 
 uniform uint uTextureFlags;
-uniform float time;
-uniform vec3 lightDir;
-uniform vec3 viewPos;
+uniform float uTime;
+uniform vec3 uLightDir;
+uniform vec3 uViewPos;
 
 #define HAS_DIFFUSE  (1u << 0u)
 #define HAS_SPECULAR (1u << 1u)
@@ -32,13 +34,16 @@ void main()
 {
     vec3 lightColor = vec3(1.0, 0.85, 0.75) * 0.8;
 
-    vec3 lightDir = normalize(-lightDir);
-    vec3 viewDir = normalize(viewPos - Position);
+    vec3 lightDir = normalize(-uLightDir);
+    vec3 viewDir = normalize(uViewPos - Position);
 
     // Texture mapping
     float useDiffuse = float((uTextureFlags & HAS_DIFFUSE) != 0u);
     vec4 color = mix(vec4(1.0), texture(texture_diffuse1, TexCoords), useDiffuse);
+
+    // Alpha test
     float alphaMask = step(0.1, color.a);
+    gl_FragDepth = gl_FragCoord.z * alphaMask + (1.0 - alphaMask); // mix(1.0, gl_FragCoord.z, alphaMask);
 
     // Normal mapping
     float useNormal = float((uTextureFlags & HAS_NORMAL) != 0u);
@@ -64,9 +69,10 @@ void main()
 
     float closestDepth = 0.0;
     float samples = 0.0;
-    float bias = 0.0025;
     float pcfRadius = 1.0 / textureSize(shadowMap, 0).x;
+    float bias = 1.73205080757 * pcfRadius;
     float currentDepth = projCoords.z;
+    float shadow = 1.0;
 
     for(int x = -1; x <= 1; ++x)
     {
@@ -87,7 +93,7 @@ void main()
         step(0.0, projCoords.y)
     );
 
-    float shadow = mix(1.0, closestDepth / samples, shadowMask);
+    shadow = mix(1.0, closestDepth / samples, shadowMask);
     diff *= shadow;
     
     vec3 diffuse = lightColor * diff * color.rgb;
@@ -107,7 +113,7 @@ void main()
     );
     vec3 specular = lightColor * spec * specStrength;
 
-    color = vec4(ambient + diffuse + specular, color.a);
+    color = vec4(ambient + diffuse + specular, color.a * alphaMask);
 
 	FragColor = color;
 }

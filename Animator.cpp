@@ -26,7 +26,7 @@ Animator::~Animator() {
 	glDeleteBuffers(1, &m_BonesUBO);
 }
 
-void Animator::updateAnimation(Shader* shader) {
+void Animator::updateAnimation(Shader& shader) {
 	m_DeltaTime = Time::getLastDeltaTime();
 
 	if (m_CurrentAnimation) {
@@ -42,9 +42,9 @@ void Animator::updateAnimation(Shader* shader) {
 	glBindBuffer(GL_UNIFORM_BUFFER, m_BonesUBO);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4) * m_FinalBoneMatrices.size(), m_FinalBoneMatrices.data());
 
-	GLuint blockIndex = glGetUniformBlockIndex(shader->getID(), "Bones");
+	GLuint blockIndex = glGetUniformBlockIndex(shader.getID(), "Bones");
 	if (blockIndex != GL_INVALID_INDEX)
-		glUniformBlockBinding(shader->getID(), blockIndex, m_BindingPoint);
+		glUniformBlockBinding(shader.getID(), blockIndex, m_BindingPoint);
 }
 
 void Animator::playAnimation(Animation* animation) {

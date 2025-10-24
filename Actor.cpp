@@ -1,7 +1,7 @@
 #include "Actor.hpp"
 
 Actor::Actor(std::string path)
-	: filePath(std::move(path)), location(0.0f, 0.0f, 0.0f)
+	: filePath(std::move(path)), location(0.0f, 0.0f, 0.0f), model(filePath)
 {
 	// Generate a simple unique ID based on current time and address
 	ID = "actor_" + std::to_string(reinterpret_cast<uintptr_t>(this)) + "_" + std::to_string(static_cast<uint64_t>(time(nullptr)));
@@ -27,4 +27,10 @@ glm::vec3 Actor::getPosition() {
 
 std::string Actor::getFilePath() {
 	return filePath;
+}
+
+void Actor::draw() {
+	if (isActive) {
+		//model.draw();
+	}
 }

@@ -175,8 +175,10 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationRetarget.cpp" />
     <ClCompile Include="Animator.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="ShaderStage.cpp" />
     <ClCompile Include="TextureCubeMap.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -206,12 +208,14 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="Actor.hpp" />
     <ClInclude Include="Animation.hpp" />
+    <ClInclude Include="AnimationRetarget.hpp" />
     <ClInclude Include="Animator.hpp" />
     <ClInclude Include="AssimpGLMHelpers.hpp" />
     <ClInclude Include="Bone.hpp" />
     <ClInclude Include="I_Texture.hpp" />
     <ClInclude Include="RenderTexture.hpp" />
     <ClInclude Include="ScreenQuad.hpp" />
+    <ClInclude Include="ShaderStage.hpp" />
     <ClInclude Include="TextureCubeMap.hpp" />
     <ClInclude Include="Time.hpp" />
     <ClInclude Include="Camera.hpp" />

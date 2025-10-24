@@ -4,6 +4,8 @@
 #include <ctime>
 #include <glm/glm.hpp>
 
+#include "Model.hpp"
+
 class Actor {
 public:
 	Actor(std::string);
@@ -27,7 +29,11 @@ public:
 protected:
 	std::string ID;
 	bool isActive = true;
-
 	std::string filePath;
 	glm::vec3 location;
+
+	Model model;
+
+	void draw();
+	friend class World;
 };

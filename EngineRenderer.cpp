@@ -7,8 +7,8 @@ void EngineRenderer::onInit() {
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
 
-	shadowMap = new RenderTexture(2048, 2048);
-	shadowMap->useDepthTexture(GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+	shadowMap = new RenderTexture(8192, 8192);
+	shadowMap->useDepthTexture(Texture2D::FilterLinear, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
 
 	// Models and their matrices
 	models.push_back(new Model("Resources/engine/models/cube.obj"));
@@ -17,7 +17,7 @@ void EngineRenderer::onInit() {
 
 	models.push_back(new Model("Resources/engine/models/backpack/backpack.obj"));
 	glm::mat4 mat2 = glm::mat4(1.0f);
-	mat2 = glm::translate(mat2, glm::vec3(0.0f, -0.5f, 3.0f));
+	mat2 = glm::translate(mat2, glm::vec3(0.0f, 1.0f, -1.0f));
 	mat2 = glm::scale(mat2, glm::vec3(0.3f));
 	modelMatrices.push_back(mat2);
 
@@ -28,11 +28,18 @@ void EngineRenderer::onInit() {
 
 	models.push_back(new Model("Resources/engine/models/char13.fbx", Model::SKINNED));
 	glm::mat4 mat_4 = glm::mat4(1.0f);
-	mat_4 = glm::translate(mat_4, glm::vec3(2.0f, 0.0f, 2.0f));
+	mat_4 = glm::translate(mat_4, glm::vec3(2.0f, 0.0f, -2.0f));
 	mat_4 = glm::scale(mat_4, glm::vec3(0.01f)); // FBX model is huge
 	modelMatrices.push_back(mat_4);
 
-	danceAnimation = new Animation("Resources/engine/models/Happy.fbx", models[3]);
+	models.push_back(new Model("Resources/engine/models/Sponza/Sponza.gltf"));
+	glm::mat4 mat5 = glm::mat4(1.0f);
+	mat5 = glm::translate(mat5, glm::vec3(0.0f, 0.0f, 0.0f));
+	mat5 = glm::scale(mat5, glm::vec3(0.01f)); // Sponza model is huge
+	modelMatrices.push_back(mat5);
+
+	mixamoRetarget = new AnimationRetarget("Resources/engine/models/mixamo_retarget.json", AnimationRetarget::Mode::Flexible);
+	danceAnimation = new Animation("Resources/engine/models/Happy.fbx", models[3], mixamoRetarget);
 	animator = new Animator(danceAnimation);
 
 	// Cube map (skybox)
@@ -44,26 +51,39 @@ void EngineRenderer::onInit() {
 		"Resources/engine/skybox/bc/front.png",
 		"Resources/engine/skybox/bc/back.png"
 	};
-	skybox = new TextureCubeMap(skyboxFaces, TextureCubeMap::TextureCubeMapSkybox);
+	skybox = new TextureCubeMap(skyboxFaces, TextureCubeMap::Skybox);
 
-	skyboxShader = new Shader("Resources/engine/shaders/skybox_vertex.glsl",
-		"Resources/engine/shaders/skybox_fragment.glsl");
-    shader = new Shader("Resources/engine/shaders/mesh_skinned_vertex.glsl",
-        "Resources/engine/shaders/mesh_fragment.glsl");
-	quadShader = new Shader("Resources/engine/shaders/quad_vertex.glsl",
-		"Resources/engine/shaders/quad_fragment.glsl");
+	skyboxShader
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/skybox_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/skybox_fragment.glsl")
+		.link();
+
+	shader
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_skinned_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_fragment.glsl")
+		.link();
+
+	quadShader
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/quad_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/quad_fragment.glsl")
+		.link();
+
+	shadowShader
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_skinned_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_simple_fragment.glsl")
+		.link();
 
 	camera = new Camera();
 	camera->setPivotDistance(0.01f); // FPS style camera
 	camera->setRotation(0.0f, 0.0f, 0.0f);
-	camera->setPerspective( 70.0f, 0.1f, 10000.0f);
+	camera->setPerspective( 70.0f, 0.1f, 1000.0f);
 	camera->setAspectRatio(Window::width(), Window::height());
 	camera->setRotationMode(Camera::ROTATION_LIMITED);
 
 	lightCamera = new Camera();
 	lightCamera->setPivotDistance(1.0f);
-	lightCamera->setRotation(-45.0f, -45.0f, 0.0f);
-	lightCamera->setOrthographic(10.0f, -10.0f, 10.0f);
+	lightCamera->setRotation(-76.0f, -27.0f, 0.0f);
+	lightCamera->setOrthographic(40.0f, -40.0f, 40.0f);
 	lightCamera->setAspectRatio(1, 1);
 	lightCamera->setRotationMode(Camera::ROTATION_FREE);
 
@@ -113,21 +133,23 @@ void EngineRenderer::onUpdate() {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
-	shader->use();
+	shadowShader.bind();
 	float lightProjection[16];
 	lightCamera->getProjectionMatrix(lightProjection);
-	shader->setMat4("projection", lightProjection);
+	shadowShader.setMat4("projection", lightProjection);
 	float lightView[16];
 	lightCamera->getViewMatrix(lightView);
-	shader->setMat4("view", lightView);
+	shadowShader.setMat4("view", lightView);
 	for (int i = 1; i < models.size(); i++) {
 		Model* m = models[i];
 		glm::mat4 modelMatrix = modelMatrices[i];
-		shader->setMat4("model", glm::value_ptr(modelMatrix));
-		m->draw(*shader);
+		shadowShader.setMat4("model", glm::value_ptr(modelMatrix));
+		m->draw(shadowShader);
 	}
-	shader->stop();
+	shadowShader.unbind();
 
 	shadowMap->unbind();
 
@@ -140,23 +162,23 @@ void EngineRenderer::onUpdate() {
 	glDepthFunc(GL_LEQUAL);
 	glDisable(GL_CULL_FACE);
 
-	skyboxShader->use();
+	skyboxShader.bind();
 
 	float viewNoTranslation[16];
 	camera->getViewMatrix(viewNoTranslation);
 	viewNoTranslation[12] = 0.0f;
 	viewNoTranslation[13] = 0.0f;
 	viewNoTranslation[14] = 0.0f;
-	skyboxShader->setMat4("view", viewNoTranslation);
+	skyboxShader.setMat4("view", viewNoTranslation);
 	float projection[16];
 	camera->getProjectionMatrix(projection);
-	skyboxShader->setMat4("projection", projection);
+	skyboxShader.setMat4("projection", projection);
 
 	skybox->bind(0);
-	skyboxShader->setInt("skybox", 0);
+	skyboxShader.setInt("skybox", 0);
 
-	models[0]->draw(*skyboxShader);
-	skyboxShader->stop();
+	models[0]->draw(skyboxShader);
+	skyboxShader.unbind();
 
 
 
@@ -167,60 +189,62 @@ void EngineRenderer::onUpdate() {
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
 
-	shader->use();
+	shader.bind();
 
-	shader->setFloat("time", Time::getTime());
+	shader.setFloat("uTime", Time::getTime());
 
 	float cmProjection[16];
 	camera->getProjectionMatrix(cmProjection);
-	shader->setMat4("projection", cmProjection);
+	shader.setMat4("projection", cmProjection);
 
 	float view[16];
 	camera->getViewMatrix(view);
-	shader->setMat4("view", view);
+	shader.setMat4("view", view);
 
-	shader->setVec3("viewPos", camera->getWorldPosition());
-	shader->setVec3("lightDir", glm::normalize(glm::vec3(-0.2f, -1.0f, -0.3f)));
+	shader.setVec3("uViewPos", camera->getWorldPosition());
+	shader.setVec3("uLightDir", glm::normalize(lightCamera->getForward()));
 
 	shadowMap->getDepthTexture()->bind(8);
-	shader->setInt("shadowMap", 8);
+	shader.setInt("shadowMap", 8);
 
 	float lightSpaceMatrix[16];
 	lightCamera->getProjectionMatrix(lightSpaceMatrix);
 	float lightViewMatrix[16];
 	lightCamera->getViewMatrix(lightViewMatrix);
 	glm::mat4 lightSpace = glm::make_mat4(lightSpaceMatrix) * glm::make_mat4(lightViewMatrix);
-	shader->setMat4("lightSpaceMatrix", glm::value_ptr(lightSpace));
+	shader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpace));
 
 	for (int i = 1; i < models.size(); i++) {
 		if ((models[i]->getMode() & Model::ModelMode::SKINNED) == Model::ModelMode::SKINNED) {
 			animator->updateAnimation(shader);
 		}
+
 		Model* m = models[i];
 		glm::mat4 modelMatrix = modelMatrices[i];
-		shader->setMat4("model", glm::value_ptr(modelMatrix));
-		m->draw(*shader);
+		shader.setMat4("model", glm::value_ptr(modelMatrix));
+		m->draw(shader);
 	}
 
-    shader->stop();
+    shader.unbind();
 
 	renderTexture->unbind();
 
 	// Render screen quad
-	quadShader->use();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+
+	quadShader.bind();
 	renderTexture->getColorAttachments()[0].texture->bind(0);
 	//shadowMap->getDepthTexture()->bind(0);
-	shader->setInt("TextureColor", 0);
+	quadShader.setInt("TextureColor", 0);
 	ScreenQuad::draw();
-	quadShader->stop();
+	quadShader.unbind();
 }
 
 void EngineRenderer::onDestroy() {
-    delete shader;
-	delete skyboxShader;
-	delete quadShader;
-
 	delete camera;
 	delete skybox;
 
@@ -230,6 +254,7 @@ void EngineRenderer::onDestroy() {
 	models.clear();
 	modelMatrices.clear();
 	delete danceAnimation;
+	delete mixamoRetarget;
 	delete animator;
 
 	delete renderTexture;
