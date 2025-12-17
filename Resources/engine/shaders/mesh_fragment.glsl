@@ -1,6 +1,4 @@
 #version 330 core
-#define PREDEFINED_MACRO
-#line 3
 
 out vec4 FragColor;
 
@@ -9,7 +7,6 @@ in vec3 Normal;
 in vec3 Position;
 in vec4 vColor;
 in mat3 TBN;
-in mat3 TBN_transpose;
 
 in vec4 FragPosLightSpace;
 
@@ -51,7 +48,7 @@ void main()
     // False
         normalize(Normal),
     // True
-        normalize( TBN_transpose * (texture(texture_normal1, TexCoords).rgb * 2.0 - 1.0) ),
+        normalize( TBN * (texture(texture_normal1, TexCoords).rgb * 2.0 - 1.0) ),
     // ?
         useNormal
     );

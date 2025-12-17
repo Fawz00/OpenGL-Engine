@@ -14,6 +14,7 @@
 int main()
 {
     std::cout << __cplusplus << "\n";
+
 	Window::create(1280, 720, "OpenGL 3D", false, false);
 	if (!Window::getGLFWwindow()) {
 		Debug::logError("Failed to create window");
@@ -48,15 +49,18 @@ int main()
 		}
         if (Input::keyboard.isKeyPressed(GLFW_KEY_ESCAPE)) {
 			Window::showCursor(!Window::isCursorVisible());
-            //Window::setShouldClose(true);
+			if (Window::isCursorVisible())
+			{
+				Time::timeScale = 0.2f;
+			}
+			else
+			{
+				Time::timeScale = 1.0f;
+			}
 		}
-
-		// Clear screen
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClearDepth(1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//Debug::log("FPS: %.1f", 1.0f / Time::getLastDeltaTime());
+		if (Input::keyboard.isKeyPressed(GLFW_KEY_DELETE)) {
+			Window::setShouldClose(true);
+		}
 
 		// Start the ImGui frame
         ImGuiWindow::beginFrame();
@@ -80,7 +84,9 @@ int main()
     Window::destroy();
 
 	/*
-		Known error code on exit :
+		Return code on exit :
+		- 0x00000000 : Normal.
+		- 0xffffffff : Failed to create window.
 		- 0xc0000409 : Stack buffer overrun
 			Probably due to some destructors being called in the wrong order on exit.
 			Possibly related to static variables in multiple translation units.

@@ -6,6 +6,7 @@ void Time::update() {
     if (!initialized) {
         startTime = now;
         lastFrameTime = now;
+        scaledTime = 0.0f;
         initialized = true;
     }
 
@@ -13,13 +14,22 @@ void Time::update() {
     lastDeltaTime = currentDeltaTime;
     currentDeltaTime = duration;
     lastFrameTime = now;
+
+    scaledTime += currentDeltaTime * timeScale;
+}
+
+float Time::getApplicationTime() {
+    if (!initialized) return 0.0f;
+    auto now = clock::now();
+    float elapsed = std::chrono::duration<float>(now - startTime).count();
+    return elapsed;
 }
 
 float Time::getTime(bool scaled) {
     if (!initialized) return 0.0f;
-    auto now = clock::now();
-    float elapsed = std::chrono::duration<float>(now - startTime).count();
-    return scaled ? elapsed * timeScale : elapsed;
+    if (!scaled) return getApplicationTime();
+
+    return scaledTime;
 }
 
 float Time::getCurrentDeltaTime(bool scaled) {

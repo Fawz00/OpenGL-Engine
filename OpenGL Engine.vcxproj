@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -100,7 +100,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
@@ -122,7 +122,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
@@ -143,7 +143,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
@@ -165,7 +165,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources" "$(OutDir)Resources\"
@@ -173,22 +173,23 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="Animation.cpp" />
-    <ClCompile Include="AnimationRetarget.cpp" />
-    <ClCompile Include="Animator.cpp" />
-    <ClCompile Include="RenderTexture.cpp" />
-    <ClCompile Include="ShaderStage.cpp" />
-    <ClCompile Include="TextureCubeMap.cpp" />
-    <ClCompile Include="Time.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Debug.cpp" />
-    <ClCompile Include="EngineRenderer.cpp" />
-    <ClCompile Include="FpsTool.cpp" />
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="ImGuiWindow.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="KeyboardInput.cpp" />
+    <ClCompile Include="src\Actor.cpp" />
+    <ClCompile Include="src\Animation.cpp" />
+    <ClCompile Include="src\AnimationRetarget.cpp" />
+    <ClCompile Include="src\Animator.cpp" />
+    <ClCompile Include="src\AudioSystem.cpp" />
+    <ClCompile Include="src\RenderTexture.cpp" />
+    <ClCompile Include="src\ShaderStage.cpp" />
+    <ClCompile Include="src\TextureCubeMap.cpp" />
+    <ClCompile Include="src\Time.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Debug.cpp" />
+    <ClCompile Include="src\EngineRenderer.cpp" />
+    <ClCompile Include="src\FpsTool.cpp" />
+    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\ImGuiWindow.cpp" />
+    <ClCompile Include="src\Input.cpp" />
+    <ClCompile Include="src\KeyboardInput.cpp" />
     <ClCompile Include="Libraries\include\imgui\imgui.cpp" />
     <ClCompile Include="Libraries\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="Libraries\include\imgui\imgui_draw.cpp" />
@@ -196,37 +197,38 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="Libraries\include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Libraries\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="Libraries\include\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="MouseInput.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Texture2D.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\MouseInput.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\Texture2D.cpp" />
+    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Actor.hpp" />
-    <ClInclude Include="Animation.hpp" />
-    <ClInclude Include="AnimationRetarget.hpp" />
-    <ClInclude Include="Animator.hpp" />
-    <ClInclude Include="AssimpGLMHelpers.hpp" />
-    <ClInclude Include="Bone.hpp" />
-    <ClInclude Include="I_Texture.hpp" />
-    <ClInclude Include="RenderTexture.hpp" />
-    <ClInclude Include="ScreenQuad.hpp" />
-    <ClInclude Include="ShaderStage.hpp" />
-    <ClInclude Include="TextureCubeMap.hpp" />
-    <ClInclude Include="Time.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="Debug.hpp" />
-    <ClInclude Include="EngineRenderer.hpp" />
-    <ClInclude Include="EventBus.hpp" />
-    <ClInclude Include="FpsTool.hpp" />
-    <ClInclude Include="ImGuiWindow.hpp" />
-    <ClInclude Include="Input.hpp" />
-    <ClInclude Include="KeyboardInput.hpp" />
-    <ClInclude Include="I_Lifecycle.hpp" />
+    <ClInclude Include="src\Actor.hpp" />
+    <ClInclude Include="src\Animation.hpp" />
+    <ClInclude Include="src\AnimationRetarget.hpp" />
+    <ClInclude Include="src\Animator.hpp" />
+    <ClInclude Include="src\AssimpGLMHelpers.hpp" />
+    <ClInclude Include="src\AudioSystem.hpp" />
+    <ClInclude Include="src\Bone.hpp" />
+    <ClInclude Include="src\I_Texture.hpp" />
+    <ClInclude Include="src\RenderTexture.hpp" />
+    <ClInclude Include="src\ScreenQuad.hpp" />
+    <ClInclude Include="src\ShaderStage.hpp" />
+    <ClInclude Include="src\TextureCubeMap.hpp" />
+    <ClInclude Include="src\Time.hpp" />
+    <ClInclude Include="src\Camera.hpp" />
+    <ClInclude Include="src\Debug.hpp" />
+    <ClInclude Include="src\EngineRenderer.hpp" />
+    <ClInclude Include="src\EventBus.hpp" />
+    <ClInclude Include="src\FpsTool.hpp" />
+    <ClInclude Include="src\ImGuiWindow.hpp" />
+    <ClInclude Include="src\Input.hpp" />
+    <ClInclude Include="src\KeyboardInput.hpp" />
+    <ClInclude Include="src\I_Lifecycle.hpp" />
     <ClInclude Include="Libraries\include\imgui\imconfig.h" />
     <ClInclude Include="Libraries\include\imgui\imgui.h" />
     <ClInclude Include="Libraries\include\imgui\imgui_impl_glfw.h" />
@@ -236,15 +238,15 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="Libraries\include\imgui\imstb_rectpack.h" />
     <ClInclude Include="Libraries\include\imgui\imstb_textedit.h" />
     <ClInclude Include="Libraries\include\imgui\imstb_truetype.h" />
-    <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="Model.hpp" />
-    <ClInclude Include="MouseInput.hpp" />
-    <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="SystemEvents.hpp" />
-    <ClInclude Include="Texture2D.hpp" />
-    <ClInclude Include="Window.hpp" />
-    <ClInclude Include="World.hpp" />
+    <ClInclude Include="src\Mesh.hpp" />
+    <ClInclude Include="src\Model.hpp" />
+    <ClInclude Include="src\MouseInput.hpp" />
+    <ClInclude Include="src\Shader.hpp" />
+    <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\SystemEvents.hpp" />
+    <ClInclude Include="src\Texture2D.hpp" />
+    <ClInclude Include="src\Window.hpp" />
+    <ClInclude Include="src\World.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

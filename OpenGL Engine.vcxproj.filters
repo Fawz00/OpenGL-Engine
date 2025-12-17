@@ -43,43 +43,34 @@
     <Filter Include="Source Files\Engine\Core\Renderer\Models">
       <UniqueIdentifier>{4beb3ce8-be7b-44aa-8ba5-b7bfa2aaa263}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Audio">
+      <UniqueIdentifier>{e213f044-74d6-4070-8c74-e3252a42fe77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c">
+    <ClCompile Include="src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="src\Window.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
       <DependentUpon>Window.h</DependentUpon>
     </ClCompile>
-    <ClCompile Include="KeyboardInput.cpp">
+    <ClCompile Include="src\KeyboardInput.cpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClCompile>
-    <ClCompile Include="MouseInput.cpp">
+    <ClCompile Include="src\MouseInput.cpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Debug.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="EngineRenderer.cpp">
+    <ClCompile Include="src\EngineRenderer.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
+    <ClCompile Include="src\Shader.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="FpsTool.cpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Time.cpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="src\Camera.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Libraries\include\imgui\imgui.cpp">
@@ -103,78 +94,78 @@
     <ClCompile Include="Libraries\include\imgui\imgui_impl_opengl3.cpp">
       <Filter>Source Files\Engine\Libraries\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiWindow.cpp">
+    <ClCompile Include="src\ImGuiWindow.cpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClCompile>
-    <ClCompile Include="Texture2D.cpp">
+    <ClCompile Include="src\Texture2D.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
     </ClCompile>
-    <ClCompile Include="TextureCubeMap.cpp">
+    <ClCompile Include="src\TextureCubeMap.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
+    <ClCompile Include="src\Mesh.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="src\Model.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Animation.cpp">
+    <ClCompile Include="src\Animation.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Animator.cpp">
+    <ClCompile Include="src\Animator.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTexture.cpp">
+    <ClCompile Include="src\RenderTexture.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="World.cpp">
+    <ClCompile Include="src\World.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Actor.cpp">
+    <ClCompile Include="src\Actor.cpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationRetarget.cpp">
+    <ClCompile Include="src\AnimationRetarget.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderStage.cpp">
+    <ClCompile Include="src\ShaderStage.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Time.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input.cpp">
+      <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Debug.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FpsTool.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AudioSystem.cpp">
+      <Filter>Source Files\Engine\Core\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stb_image.h">
+    <ClInclude Include="src\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KeyboardInput.hpp">
+    <ClInclude Include="src\KeyboardInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClInclude>
-    <ClInclude Include="MouseInput.hpp">
+    <ClInclude Include="src\MouseInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Debug.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="EngineRenderer.hpp">
+    <ClInclude Include="src\EngineRenderer.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.hpp">
+    <ClInclude Include="src\Shader.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="FpsTool.hpp">
-      <Filter>Source Files\Engine\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Time.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="EventBus.hpp">
-      <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="SystemEvents.hpp">
+    <ClInclude Include="src\SystemEvents.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.hpp">
+    <ClInclude Include="src\Camera.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Libraries\include\imgui\imconfig.h">
@@ -204,59 +195,77 @@
     <ClInclude Include="Libraries\include\imgui\imgui_impl_opengl3.h">
       <Filter>Source Files\Engine\Libraries\Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiWindow.hpp">
+    <ClInclude Include="src\ImGuiWindow.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="I_Texture.hpp">
+    <ClInclude Include="src\I_Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="I_Lifecycle.hpp">
+    <ClInclude Include="src\I_Lifecycle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AssimpGLMHelpers.hpp">
+    <ClInclude Include="src\AssimpGLMHelpers.hpp">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Texture2D.hpp">
+    <ClInclude Include="src\Texture2D.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="TextureCubeMap.hpp">
+    <ClInclude Include="src\TextureCubeMap.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.hpp">
+    <ClInclude Include="src\Mesh.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Model.hpp">
+    <ClInclude Include="src\Model.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Animation.hpp">
+    <ClInclude Include="src\Animation.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Bone.hpp">
+    <ClInclude Include="src\Bone.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Animator.hpp">
+    <ClInclude Include="src\Animator.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Window.hpp">
+    <ClInclude Include="src\Window.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTexture.hpp">
+    <ClInclude Include="src\RenderTexture.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenQuad.hpp">
+    <ClInclude Include="src\ScreenQuad.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="World.hpp">
+    <ClInclude Include="src\World.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Actor.hpp">
+    <ClInclude Include="src\Actor.hpp">
       <Filter>Source Files\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationRetarget.hpp">
+    <ClInclude Include="src\AnimationRetarget.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderStage.hpp">
+    <ClInclude Include="src\ShaderStage.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Time.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.hpp">
+      <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventBus.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Debug.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FpsTool.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AudioSystem.hpp">
+      <Filter>Source Files\Engine\Core\Audio</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

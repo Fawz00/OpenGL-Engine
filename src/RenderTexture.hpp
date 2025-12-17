@@ -25,6 +25,14 @@ struct ColorAttachment
 class RenderTexture
 {
 public:
+    enum ClearMode : uint32_t {
+        NONE = 0,
+        CLEAR_COLOR = 1 << 0,
+        CLEAR_DEPTH = 1 << 1,
+        CLEAR_STENCIL = 1 << 2,
+        CLEAR_ALL = CLEAR_COLOR | CLEAR_STENCIL | CLEAR_DEPTH,
+    };
+
     RenderTexture(int width, int height);
     ~RenderTexture();
 
@@ -32,7 +40,7 @@ public:
 	void useDepthTexture(Texture2D::FilterMode filter = Texture2D::FilterNearest, GLenum depthInternalFormat = GL_DEPTH_COMPONENT24, GLenum depthDataFormat = GL_DEPTH_COMPONENT, GLenum depthDataType = GL_UNSIGNED_BYTE);
     void useDepthRBO();
 
-    void bind();
+    void bind(ClearMode clearMode = CLEAR_ALL);
 	void resize(int newWidth, int newHeight);
     static void unbind();
 

@@ -7,8 +7,8 @@ void EngineRenderer::onInit() {
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
 
-	shadowMap = new RenderTexture(8192, 8192);
-	shadowMap->useDepthTexture(Texture2D::FilterLinear, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+	shadowMap = new RenderTexture(720, 720);
+	shadowMap->useDepthTexture(Texture2D::FilterNearest);
 
 	// Models and their matrices
 	models.push_back(new Model("Resources/engine/models/cube.obj"));
@@ -59,7 +59,7 @@ void EngineRenderer::onInit() {
 		.link();
 
 	shader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_skinned_vertex.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_vertex.glsl", {"SKINNED"})
 		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_fragment.glsl")
 		.link();
 
@@ -69,7 +69,7 @@ void EngineRenderer::onInit() {
 		.link();
 
 	shadowShader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_skinned_vertex.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_vertex.glsl", {"SKINNED"})
 		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_simple_fragment.glsl")
 		.link();
 
@@ -150,7 +150,6 @@ void EngineRenderer::onUpdate() {
 		m->draw(shadowShader);
 	}
 	shadowShader.unbind();
-
 	shadowMap->unbind();
 
 
@@ -228,7 +227,6 @@ void EngineRenderer::onUpdate() {
 	}
 
     shader.unbind();
-
 	renderTexture->unbind();
 
 	// Render screen quad
@@ -236,9 +234,14 @@ void EngineRenderer::onUpdate() {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 
+	// Clear screen
+	glViewport(0, 0, Window::width(), Window::height());
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearDepth(1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	quadShader.bind();
 	renderTexture->getColorAttachments()[0].texture->bind(0);
-	//shadowMap->getDepthTexture()->bind(0);
 	quadShader.setInt("TextureColor", 0);
 	ScreenQuad::draw();
 	quadShader.unbind();

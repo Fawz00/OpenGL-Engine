@@ -87,6 +87,7 @@ GLint ShaderStage::compile() const {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         Debug::logError("Shader compilation error:\n" + std::string(infoLog) + "\nShader source path: " + path);
+		Debug::logError("Shader source:\n" + source);
         throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
     }
     return shader;

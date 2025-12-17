@@ -4,6 +4,7 @@
 
 class Time {
 public:
+    static float getApplicationTime();
     static float getTime(bool scaled = true);
     static float getCurrentDeltaTime(bool scaled = true);
     static float getLastDeltaTime(bool scaled = true);
@@ -21,4 +22,5 @@ private:
     static inline float currentDeltaTime{ 0.0f };
     static inline float lastDeltaTime{ 0.0f };
     static inline bool initialized{ false };
+    static inline float scaledTime{ 0.0f };
 };

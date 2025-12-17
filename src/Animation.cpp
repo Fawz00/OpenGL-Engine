@@ -87,17 +87,17 @@ void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src, const
     if (!src) return;
 
     std::string sourceName = src->mName.C_Str();
-    std::string nodeName = sourceName;
+    std::string targetName = sourceName;
 
     // Apply retarget mapping: source -> target
     if (m_Retarget) {
         std::string mappedName = m_Retarget->mapBoneName(sourceName); // source -> target
         if (!mappedName.empty()) {
-            nodeName = mappedName;
+            targetName = mappedName;
         }
     }
 
-    dest.name = nodeName;
+    dest.name = targetName;
     dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
     dest.childrenCount = static_cast<int>(src->mNumChildren);
     dest.children.reserve(src->mNumChildren);
@@ -107,11 +107,11 @@ void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src, const
     if (!parentName.empty()) {
         mappedParent = m_NodeParentMap[parentName];
     }
-    m_NodeParentMap[nodeName] = mappedParent;
+    m_NodeParentMap[targetName] = mappedParent;
 
     for (unsigned int i = 0; i < src->mNumChildren; ++i) {
         AssimpNodeData child;
-        readHierarchyData(child, src->mChildren[i], nodeName);
+        readHierarchyData(child, src->mChildren[i], targetName);
         dest.children.push_back(std::move(child));
     }
 }

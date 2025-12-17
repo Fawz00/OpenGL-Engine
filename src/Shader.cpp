@@ -3,19 +3,27 @@
 Shader::~Shader() {
     if (program != 0) {
         glDeleteProgram(program);
-        program = 0;
     }
 }
 
 Shader& Shader::attachShader(ShaderType type, const std::string& path, std::initializer_list<std::string> defines) {
-    ShaderStage stage(type, path);
-    for (auto& d : defines)
-        stage.define(d);
-    stages.push_back(stage);
-    return *this;
+	if (linked) {
+		throw std::runtime_error("Cannot attach shader after program has been linked.");
+	}
+
+	ShaderStage stage(type, path);
+	for (auto& d : defines)
+		stage.define(d);
+	stages.push_back(stage);
+	return *this;
 }
 
 Shader& Shader::define(const std::string& macro) {
+    if (linked)
+    {
+        throw std::runtime_error("Cannot define macro after program has been linked.");
+    }
+
     globalDefines.push_back(macro);
     return *this;
 }
@@ -80,50 +88,72 @@ void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset, G
         glVertexAttribIPointer(id, size, type, stride, offset);
         return;
 	}
-    glVertexAttribPointer(id, size, GL_FLOAT, GL_FALSE, stride, offset);
+    glVertexAttribPointer(id, size, type, GL_FALSE, stride, offset);
 }
 
 void Shader::disableAttr(GLint id) {
     glDisableVertexAttribArray(id);
 }
 
+GLint Shader::getCachedUniformLocation(std::unordered_map<std::string, GLint> cache, GLuint program, const std::string& name)
+{
+    auto it = cache.find(name);
+    if (it != cache.end()) {
+        return it->second;
+    }
+    GLint loc = glGetUniformLocation(static_cast<GLint>(program), name.c_str());
+    cache.emplace(name, loc);
+    return loc;
+}
+
 // Uniform setters
 void Shader::setUInt(const std::string& name, unsigned int value) {
-    glUniform1ui(glGetUniformLocation(program, name.c_str()), value);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform1ui(loc, value);
 }
 
 void Shader::setInt(const std::string& name, int value) {
-    glUniform1i(glGetUniformLocation(program, name.c_str()), value);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform1i(loc, value);
 }
 
 void Shader::setFloat(const std::string& name, float value) {
-    glUniform1f(glGetUniformLocation(program, name.c_str()), value);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform1f(loc, value);
 }
 
 void Shader::setVec2(const std::string& name, const float* data) {
-    glUniform2fv(glGetUniformLocation(program, name.c_str()), 1, data);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform2fv(loc, 1, data);
 }
 void Shader::setVec2(const std::string& name, const glm::vec2 &data) {
-    glUniform2fv(glGetUniformLocation(program, name.c_str()), 1, glm::value_ptr(data));
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform2fv(loc, 1, glm::value_ptr(data));
 }
 
 void Shader::setVec3(const std::string& name, const float* data) {
-    glUniform3fv(glGetUniformLocation(program, name.c_str()), 1, data);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform3fv(loc, 1, data);
 }
-void Shader::setVec3(const std::string& name, const glm::vec3 &data) {
-    glUniform3fv(glGetUniformLocation(program, name.c_str()), 1, glm::value_ptr(data));
+void Shader::setVec3(const std::string& name, const glm::vec3& data) {
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform3fv(loc, 1, glm::value_ptr(data));
 }
 
 void Shader::setVec4(const std::string& name, const float* data) {
-    glUniform4fv(glGetUniformLocation(program, name.c_str()), 1, data);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform4fv(loc, 1, data);
 }
-void Shader::setVec4(const std::string& name, const glm::vec4 &data) {
-    glUniform4fv(glGetUniformLocation(program, name.c_str()), 1, glm::value_ptr(data));
+void Shader::setVec4(const std::string& name, const glm::vec4& data) {
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniform4fv(loc, 1, glm::value_ptr(data));
 }
 
 void Shader::setMat4(const std::string& name, const float* data) {
-    glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, data);
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, data);
 }
-void Shader::setMat4(const std::string& name, const glm::mat4 &mat) {
-    glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) {
+    GLint loc = getCachedUniformLocation(uniformLocations, program, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 }

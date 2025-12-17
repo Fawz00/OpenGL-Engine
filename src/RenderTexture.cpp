@@ -138,12 +138,31 @@ Texture2D* RenderTexture::getDepthTexture() const
     }
 }
 
-void RenderTexture::bind()
+void RenderTexture::bind(ClearMode clearMode)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	glViewport(0, 0, width, height);
-    glClearDepth(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, width, height);
+
+    // Convert clearMode to integer bit flags
+    int mode = static_cast<int>(clearMode);
+    GLbitfield mask = 0;
+
+    if (mode & CLEAR_COLOR) {
+        mask |= GL_COLOR_BUFFER_BIT;
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    if (mode & CLEAR_DEPTH) {
+        mask |= GL_DEPTH_BUFFER_BIT;
+        glClearDepth(1.0f);
+    }
+    if (mode & CLEAR_STENCIL) {
+        mask |= GL_STENCIL_BUFFER_BIT;
+        glClearStencil(0);
+    }
+
+    if (mask != 0) {
+        glClear(mask);
+    }
 }
 
 void RenderTexture::unbind()
