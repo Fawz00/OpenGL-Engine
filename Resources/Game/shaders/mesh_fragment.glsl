@@ -8,7 +8,9 @@ in vec3 Position;
 in vec4 vColor;
 in mat3 TBN;
 
+#ifdef SHADOW_MAPPING
 in vec4 FragPosLightSpace;
+#endif
 
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
@@ -39,8 +41,10 @@ void main()
     vec4 color = mix(vec4(1.0), texture(texture_diffuse1, TexCoords), useDiffuse);
 
     // Alpha test
-    float alphaMask = step(0.1, color.a);
-    gl_FragDepth = gl_FragCoord.z * alphaMask + (1.0 - alphaMask); // mix(1.0, gl_FragCoord.z, alphaMask);
+#ifdef ALPHA_TEST
+    if (color.a < 0.1)
+        discard;
+#endif
 
     // Normal mapping
     float useNormal = float((uTextureFlags & HAS_NORMAL) != 0u);
@@ -60,6 +64,7 @@ void main()
     float diff = max(dot(norm, lightDir), 0.0);
 
     // Shadow
+#ifdef SHADOW_MAPPING
     vec4 fragPosLightSpace = FragPosLightSpace;
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -92,6 +97,7 @@ void main()
 
     shadow = mix(1.0, closestDepth / samples, shadowMask);
     diff *= shadow;
+#endif
     
     vec3 diffuse = lightColor * diff * color.rgb;
 
@@ -110,7 +116,7 @@ void main()
     );
     vec3 specular = lightColor * spec * specStrength;
 
-    color = vec4(ambient + diffuse + specular, color.a * alphaMask);
+    color = vec4(ambient + diffuse + specular, color.a);
 
 	FragColor = color;
 }

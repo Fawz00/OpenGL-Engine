@@ -31,8 +31,7 @@ public:
 	void bind(unsigned int slot = 0) const;
 	static void unbind();
 	
-	inline int getWidth() const { return width; }
-	inline int getHeight() const { return height; }
+	inline int* getDimension() const { return new int[2]{width, height}; }
 	inline int getSize() const { return width * height * channels; }
 	inline unsigned int getId() const
 	{

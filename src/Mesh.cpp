@@ -75,6 +75,7 @@ void Mesh::Draw(Shader& shader)
                        GL_UNSIGNED_INT,
                        0);
     }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
 	// always good practice to set everything back to defaults once configured.
@@ -104,6 +105,7 @@ void Mesh::setupMesh()
             sm.indices.data(),
             GL_STATIC_DRAW);
     }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // set vertex attributes
     Shader::setAttr(0, 3, sizeof(Vertex), (void*)0);

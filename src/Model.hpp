@@ -60,16 +60,21 @@ public:
     auto& getBoneInfoMap() { return m_BoneInfoMap; }
     int& getBoneCount() { return m_BoneCounter; }
     const std::string& getPath() const { return directory; }
-	uint32_t getMode() const { return mode; }
+    uint32_t getMode() const { return mode; }
+
+    const std::unordered_map<std::string, std::string>& getNodeParentMap() const { return m_NodeParentMap; }
+    const std::string& getRootNodeName() const { return m_RootNodeName; }
 
 private:
     // Model data
     std::string directory;
-	ModelMode mode;
+    ModelMode mode;
 
     std::vector<std::unique_ptr<Mesh>> meshes;
     std::unordered_map<std::string, std::unique_ptr<Texture2D>> textures_loaded;
     std::unordered_map<std::string, BoneInfo> m_BoneInfoMap;
+    std::unordered_map<std::string, std::string> m_NodeParentMap;
+    std::string m_RootNodeName;
     int m_BoneCounter = 0;
 
     bool gammaCorrection;
@@ -80,9 +85,10 @@ private:
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene);
     void processMesh(aiMesh* mesh, const aiScene* scene);
+    void buildNodeParentMap(const aiNode* node, const std::string& parentName);
     std::vector<Texture2D*> loadMaterialTextures(const aiScene* scene, aiMaterial* mat, aiTextureType type, Texture2D::Texture2DType texType);
 
-	// helper functions
+    // helper functions
     void setVertexBoneDataToDefault(Vertex& vertex);
     void setVertexBoneData(Vertex& vertex, int boneID, float weight);
     void extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);

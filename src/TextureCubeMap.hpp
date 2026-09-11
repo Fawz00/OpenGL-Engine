@@ -24,8 +24,7 @@ public:
 	void bind(unsigned int slot = 0) const override;
 	static void unbind();
 
-	inline int getWidth() const override { return width; }
-	inline int getHeight() const { return height; }
+	inline int* getDimension() const override { return new int[2]{width, height}; }
 	inline int getSize() const override { return width * height * 6 * channels; } // Assuming 4 channels (RGBA)
 	inline unsigned int getId() const override { return ID; }
 	inline TextureCubeMapType getType() const { return type; }

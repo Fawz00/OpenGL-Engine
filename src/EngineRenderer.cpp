@@ -7,83 +7,83 @@ void EngineRenderer::onInit() {
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
 
-	shadowMap = new RenderTexture(720, 720);
+	shadowMap = new RenderTexture(8192, 8192);
 	shadowMap->useDepthTexture(Texture2D::FilterNearest);
 
 	// Models and their matrices
-	models.push_back(new Model("Resources/engine/models/cube.obj"));
+	models.push_back(new Model("Resources/Game/models/cube.obj"));
 	glm::mat4 mat0 = glm::mat4(1.0f);
 	modelMatrices.push_back(mat0);
 
-	models.push_back(new Model("Resources/engine/models/backpack/backpack.obj"));
-	glm::mat4 mat2 = glm::mat4(1.0f);
-	mat2 = glm::translate(mat2, glm::vec3(0.0f, 1.0f, -1.0f));
-	mat2 = glm::scale(mat2, glm::vec3(0.3f));
-	modelMatrices.push_back(mat2);
-
-	models.push_back(new Model("Resources/engine/models/tropical.fbx"));
-	glm::mat4 mat1 = glm::mat4(1.0f);
-	mat1 = glm::translate(mat1, glm::vec3(-612.0f, -19.0f, 465.0f));
-	modelMatrices.push_back(mat1);
-
-	models.push_back(new Model("Resources/engine/models/char13.fbx", Model::SKINNED));
+	models.push_back(new Model("Resources/Game/models/hatsune_miku.fbx", Model::SKINNED));
 	glm::mat4 mat_4 = glm::mat4(1.0f);
 	mat_4 = glm::translate(mat_4, glm::vec3(2.0f, 0.0f, -2.0f));
 	mat_4 = glm::scale(mat_4, glm::vec3(0.01f)); // FBX model is huge
 	modelMatrices.push_back(mat_4);
 
-	models.push_back(new Model("Resources/engine/models/Sponza/Sponza.gltf"));
+	models.push_back(new Model("Resources/Game/models/backpack/backpack.obj"));
+	glm::mat4 mat2 = glm::mat4(1.0f);
+	mat2 = glm::translate(mat2, glm::vec3(0.0f, 1.0f, -1.0f));
+	mat2 = glm::scale(mat2, glm::vec3(0.3f));
+	modelMatrices.push_back(mat2);
+
+	models.push_back(new Model("Resources/Game/models/tropical.fbx"));
+	glm::mat4 mat1 = glm::mat4(1.0f);
+	mat1 = glm::translate(mat1, glm::vec3(-612.0f, -19.0f, 465.0f));
+	modelMatrices.push_back(mat1);
+
+	models.push_back(new Model("Resources/Game/models/Sponza/Sponza.gltf"));
 	glm::mat4 mat5 = glm::mat4(1.0f);
 	mat5 = glm::translate(mat5, glm::vec3(0.0f, 0.0f, 0.0f));
 	mat5 = glm::scale(mat5, glm::vec3(0.01f)); // Sponza model is huge
 	modelMatrices.push_back(mat5);
 
-	mixamoRetarget = new AnimationRetarget("Resources/engine/models/mixamo_retarget.json", AnimationRetarget::Mode::Flexible);
-	danceAnimation = new Animation("Resources/engine/models/Happy.fbx", models[3], mixamoRetarget);
+	mixamoRetarget = new AnimationRetarget("Resources/Game/models/mixamo_retarget.json", AnimationRetarget::Mode::Strict);
+	danceAnimation = new Animation("Resources/Game/models/Happy.fbx", models[1], mixamoRetarget);
 	animator = new Animator(danceAnimation);
 
 	// Cube map (skybox)
 	const char* skyboxFaces[6] = {
-		"Resources/engine/skybox/bc/right.png",
-		"Resources/engine/skybox/bc/left.png",
-		"Resources/engine/skybox/bc/top.png",
-		"Resources/engine/skybox/bc/bottom.png",
-		"Resources/engine/skybox/bc/front.png",
-		"Resources/engine/skybox/bc/back.png"
+		"Resources/Game/skybox/bc/right.png",
+		"Resources/Game/skybox/bc/left.png",
+		"Resources/Game/skybox/bc/top.png",
+		"Resources/Game/skybox/bc/bottom.png",
+		"Resources/Game/skybox/bc/front.png",
+		"Resources/Game/skybox/bc/back.png"
 	};
 	skybox = new TextureCubeMap(skyboxFaces, TextureCubeMap::Skybox);
 
 	skyboxShader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/skybox_vertex.glsl")
-		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/skybox_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/skybox_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/skybox_fragment.glsl")
 		.link();
 
 	shader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_vertex.glsl", {"SKINNED"})
-		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh_vertex.glsl", {"SKINNED", "SHADOW_MAPPING"})
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh_fragment.glsl", {"ALPHA_TEST", "SHADOW_MAPPING"})
 		.link();
 
 	quadShader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/quad_vertex.glsl")
-		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/quad_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/quad_vertex.glsl")
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/quad_fragment.glsl")
 		.link();
 
 	shadowShader
-		.attachShader(ShaderType::VertexShader, "Resources/engine/shaders/mesh_vertex.glsl", {"SKINNED"})
-		.attachShader(ShaderType::FragmentShader, "Resources/engine/shaders/mesh_simple_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh_vertex.glsl", {"SKINNED"})
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh_simple_fragment.glsl", {"ALPHA_TEST"})
 		.link();
 
 	camera = new Camera();
 	camera->setPivotDistance(0.01f); // FPS style camera
 	camera->setRotation(0.0f, 0.0f, 0.0f);
-	camera->setPerspective( 70.0f, 0.1f, 1000.0f);
+	camera->setPerspective( 70.0f, 0.1f, 1020.0f);
 	camera->setAspectRatio(Window::width(), Window::height());
 	camera->setRotationMode(Camera::ROTATION_LIMITED);
 
 	lightCamera = new Camera();
 	lightCamera->setPivotDistance(1.0f);
 	lightCamera->setRotation(-76.0f, -27.0f, 0.0f);
-	lightCamera->setOrthographic(40.0f, -40.0f, 40.0f);
+	lightCamera->setOrthographic(100.0f, -100.0f, 100.0f);
 	lightCamera->setAspectRatio(1, 1);
 	lightCamera->setRotationMode(Camera::ROTATION_FREE);
 
@@ -144,9 +144,15 @@ void EngineRenderer::onUpdate() {
 	lightCamera->getViewMatrix(lightView);
 	shadowShader.setMat4("view", lightView);
 	for (int i = 1; i < models.size(); i++) {
+		// Model matrix
 		Model* m = models[i];
 		glm::mat4 modelMatrix = modelMatrices[i];
 		shadowShader.setMat4("model", glm::value_ptr(modelMatrix));
+
+		// Normal Matrix
+		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+		shadowShader.setMat3("normalMatrix", glm::value_ptr(normalMatrix));
+
 		m->draw(shadowShader);
 	}
 	shadowShader.unbind();
@@ -220,9 +226,15 @@ void EngineRenderer::onUpdate() {
 			animator->updateAnimation(shader);
 		}
 
+		// Model matrix
 		Model* m = models[i];
 		glm::mat4 modelMatrix = modelMatrices[i];
 		shader.setMat4("model", glm::value_ptr(modelMatrix));
+
+		// Normal Matrix
+		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+		shader.setMat3("normalMatrix", glm::value_ptr(normalMatrix));
+
 		m->draw(shader);
 	}
 

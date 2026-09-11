@@ -22,9 +22,6 @@ bool AnimationRetarget::loadFromFile(const std::string& jsonPath) {
         m_RetargetMap[animBone] = modelBone;
     }
 
-    if (m_Mode == Mode::Auto)
-		m_Mode = Mode::Strict;
-
     Debug::log("Loaded retarget map with " + std::to_string(m_RetargetMap.size()) + " entries.");
     return true;
 }

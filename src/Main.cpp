@@ -15,9 +15,41 @@ int main()
 {
     std::cout << __cplusplus << "\n";
 
+#if defined(ENGINE_EDITOR)
+	std::cout << "Engine Editor Mode\n";
+#elif defined(ENGINE_GAME)
+	std::cout << "Engine Game Mode\n";
+#else
+	std::cout << "Engine Unknown Mode\n";
+#endif
+
+#if defined(BUILD_DEVELOPMENT)
+	std::cout << "Build Development\n";
+#elif defined(BUILD_SHIPPING)
+	std::cout << "Build Shipping\n";
+#else
+	std::cout << "Build Unknown\n";
+#endif
+
+	// Start the logger
+	Debug::Config config;
+
+	config.timestamp = true;
+	config.source = true;
+	config.threadId = false;
+
+	config.consoleOutput = true;
+	config.fileOutput = false;
+	config.eventBusOutput = true;
+
+	config.minimumLevel = Debug::LogLevel::Info;
+
+	Debug::start(config);
+
+	// Initialize window
 	Window::create(1280, 720, "OpenGL 3D", false, false);
 	if (!Window::getGLFWwindow()) {
-		Debug::logError("Failed to create window");
+		LOG_ERROR("Failed to create window");
 		return -1;
 	}
 
@@ -83,8 +115,10 @@ int main()
 	Input::destroy();
     Window::destroy();
 
+	Debug::stop();
+
 	/*
-		Return code on exit :
+		Known return code on exit :
 		- 0x00000000 : Normal.
 		- 0xffffffff : Failed to create window.
 		- 0xc0000409 : Stack buffer overrun

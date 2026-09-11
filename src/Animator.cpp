@@ -45,6 +45,8 @@ void Animator::updateAnimation(Shader& shader) {
 	GLuint blockIndex = glGetUniformBlockIndex(shader.getID(), "Bones");
 	if (blockIndex != GL_INVALID_INDEX)
 		glUniformBlockBinding(shader.getID(), blockIndex, m_BindingPoint);
+
+	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Animator::playAnimation(Animation* animation) {

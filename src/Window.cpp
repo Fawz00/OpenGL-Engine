@@ -62,14 +62,14 @@ void Window::create(int width, int height, const std::string& title, bool maximi
 
 void Window::setupCursors() {
     if (!window) return;
-    loadCursor(cursorArrow, "Resources/engine/textures/cursors/arrow.png", 0, 0);
-    loadCursor(cursorHand, "Resources/engine/textures/cursors/hand.png", 8, 0);
-    loadCursor(cursorText, "Resources/engine/textures/cursors/text.png", 8, 8);
-    loadCursor(cursorResizeEW, "Resources/engine/textures/cursors/resize_ew.png", 8, 8);
-    loadCursor(cursorResizeNS, "Resources/engine/textures/cursors/resize_ns.png", 8, 8);
-    loadCursor(cursorResizeNWSE, "Resources/engine/textures/cursors/resize_nwse.png", 8, 8);
-    loadCursor(cursorResizeNESW, "Resources/engine/textures/cursors/resize_nesw.png", 8, 8);
-    loadCursor(cursorMove, "Resources/engine/textures/cursors/move.png", 16, 16);
+    loadCursor(cursorArrow, "Resources/Game/textures/cursors/arrow.png", 0, 0);
+    loadCursor(cursorHand, "Resources/Game/textures/cursors/hand.png", 8, 0);
+    loadCursor(cursorText, "Resources/Game/textures/cursors/text.png", 8, 8);
+    loadCursor(cursorResizeEW, "Resources/Game/textures/cursors/resize_ew.png", 8, 8);
+    loadCursor(cursorResizeNS, "Resources/Game/textures/cursors/resize_ns.png", 8, 8);
+    loadCursor(cursorResizeNWSE, "Resources/Game/textures/cursors/resize_nwse.png", 8, 8);
+    loadCursor(cursorResizeNESW, "Resources/Game/textures/cursors/resize_nesw.png", 8, 8);
+    loadCursor(cursorMove, "Resources/Game/textures/cursors/move.png", 16, 16);
 
     // Try to load custom cursor
     if (cursorArrow) {

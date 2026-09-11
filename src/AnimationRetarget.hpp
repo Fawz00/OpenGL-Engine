@@ -6,13 +6,12 @@
 class AnimationRetarget {
 public:
     enum class Mode {
-        Auto,
         Flexible,
         Strict
     };
 
     AnimationRetarget() = default;
-    explicit AnimationRetarget(const std::string& jsonPath, Mode mode = Mode::Auto);
+    explicit AnimationRetarget(const std::string& jsonPath, Mode mode = Mode::Strict);
 
     bool loadFromFile(const std::string& jsonPath);
     void setMode(Mode mode);

@@ -74,7 +74,7 @@ namespace EventBus {
             }
         }
         catch (const std::bad_any_cast& e) {
-            Debug::logError("EventBus::unsubscribe: Bad any_cast for event type: ", e.what());
+            LOG_ERROR("EventBus::unsubscribe: Bad any_cast for event type: ", e.what());
 		}
     }
 

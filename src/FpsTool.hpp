@@ -24,5 +24,5 @@ private:
     static inline nanoseconds frameDuration{};
     static inline nanoseconds sleepDuration{};
     static inline double lastCalculatedFps{ 0.0 };
-    static inline bool limitFps{ true };
+    static inline bool limitFps{ false };
 };

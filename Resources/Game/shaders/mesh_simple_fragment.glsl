@@ -17,9 +17,10 @@ void main()
     float useDiffuse = float((uTextureFlags & HAS_DIFFUSE) != 0u);
     vec4 color = mix(vec4(1.0), texture(texture_diffuse1, TexCoords), useDiffuse);
 
-    // Alpha test
-    float alphaMask = step(0.1, color.a);
-    gl_FragDepth = gl_FragCoord.z * alphaMask + (1.0 - alphaMask); // mix(1.0, gl_FragCoord.z, alphaMask);
+#ifdef ALPHA_TEST
+    if (color.a < 0.1)
+        discard;
+#endif
 
 	FragColor = color;
 }

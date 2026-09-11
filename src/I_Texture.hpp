@@ -13,7 +13,7 @@ public:
 	virtual void bind(unsigned int slot = 0) const = 0;
 	static void unbind() {}
 	
-	virtual int getWidth() const = 0;
+	virtual int* getDimension() const = 0;
 	virtual int getSize() const = 0;
 	virtual unsigned int getId() const = 0;
 	virtual std::string getPath() const = 0;

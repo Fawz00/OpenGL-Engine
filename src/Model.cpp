@@ -25,7 +25,7 @@ void Model::loadModel(string const& path)
         aiProcess_GenSmoothNormals |
         //aiProcess_FlipUVs |
         aiProcess_GenNormals |
-		aiProcess_CalcTangentSpace * (!(mode & NO_TANGENTS))
+        aiProcess_CalcTangentSpace * (!(mode & NO_TANGENTS))
     );
 
     // Check for errors
@@ -37,8 +37,23 @@ void Model::loadModel(string const& path)
     // Retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('/'));
 
+    m_RootNodeName = scene->mRootNode->mName.C_Str();
+    buildNodeParentMap(scene->mRootNode, "");
+
     // Process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
+}
+
+void Model::buildNodeParentMap(const aiNode* node, const std::string& parentName)
+{
+    if (!node) return;
+
+    std::string name = node->mName.C_Str();
+    m_NodeParentMap[name] = parentName;
+
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        buildNodeParentMap(node->mChildren[i], name);
+    }
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -66,17 +81,17 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vertices.reserve(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
-		
+        
         if (mode & SKINNED) {
             setVertexBoneDataToDefault(vertex);
-		}
+        }
 
         vertex.Position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
         vertex.Normal = mesh->HasNormals()
             ? AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i])
             : glm::vec3(0.0f);
 
-		// Texture coordinates
+        // Texture coordinates
         if (mesh->mTextureCoords[0] && !(mode & NO_TEXTURES)) {
             vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x,
                 mesh->mTextureCoords[0][i].y);
@@ -87,10 +102,10 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 glm::vec3 B = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
 
                 /*
-				// Ensure T is orthogonal to N.
-				// Sometimes assimp messes this up.
+                // Ensure T is orthogonal to N.
+                // Sometimes assimp messes this up.
 
-				// Gram–Schmidt orthogonalize
+                // Gram–Schmidt orthogonalize
                 T = glm::normalize(T - N * glm::dot(N, T));
 
                 // Calculate handedness (±1)
@@ -123,7 +138,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
         if (mode & FORCE_TRIANGLES && face.mNumIndices != 3) {
             continue;
-		}
+        }
 
         if (face.mNumIndices == 1) {
             pointIndices.push_back(face.mIndices[0]);
@@ -137,7 +152,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             triIndices.push_back(face.mIndices[1]);
             triIndices.push_back(face.mIndices[2]);
         }
-		// If the face has more than 3 indices, we ignore it for now
+        // If the face has more than 3 indices, we ignore it for now
     }
 
     // --- Textures ---
@@ -149,7 +164,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         // Normal map heuristic
         auto normalMaps = loadMaterialTextures(scene, material, aiTextureType_NORMALS, Texture2D::Texture2DType::TextureNormal);
         if (normalMaps.empty()) {
-			// fallback: Some models use height maps as normal maps
+            // fallback: Some models use height maps as normal maps
             normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::Texture2DType::TextureNormal);
         }
 
@@ -161,10 +176,10 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
-	// --- Bones ---
+    // --- Bones ---
     if (mode & SKINNED) {
         extractBoneWeightForVertices(vertices, mesh, scene);
-	}
+    }
 
     // --- Submeshes ---
     std::vector<SubMesh> subMeshes;
@@ -198,9 +213,9 @@ vector<Texture2D*> Model::loadMaterialTextures(
         aiString str;
         mat->GetTexture(type, i, &str);
 
-		std::string texID = str.C_Str(); // "*0" for embedded, "texture.jpg" for file
+        std::string texID = str.C_Str(); // "*0" for embedded, "texture.jpg" for file
 
-		// Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
+        // Check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
         auto it = textures_loaded.find(texID);
         if (it != textures_loaded.end()) {
             textures.push_back(it->second.get());
