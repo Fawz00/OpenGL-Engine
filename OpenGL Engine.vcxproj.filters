@@ -267,5 +267,8 @@
     <ClInclude Include="src\AudioSystem.hpp">
       <Filter>Source Files\Engine\Core\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="Resources\Game\shaders\include\color_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

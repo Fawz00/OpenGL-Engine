@@ -43,12 +43,14 @@ void main()
 
     vec3 N;
     vec3 T;
+    vec3 B;
 
 #ifdef SKINNED
 
     vec4 totalPosition = vec4(0.0);
     vec3 skinnedNormal = vec3(0.0);
     vec3 skinnedTangent = vec3(0.0);
+    vec3 skinnedBitangent = vec3(0.0);
 
     for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
     {
@@ -68,6 +70,9 @@ void main()
 
         skinnedTangent +=
             mat3(boneTransform) * aTangent * w;
+
+        skinnedBitangent +=
+            mat3(boneTransform) * aBitangent * w;
     }
 
     if (length(totalPosition) < 1e-6)
@@ -75,12 +80,14 @@ void main()
         totalPosition = vec4(aPos, 1.0);
         skinnedNormal = aNormal;
         skinnedTangent = aTangent;
+        skinnedBitangent = aBitangent;
     }
 
     Position = vec3(model * totalPosition);
 
     N = normalize(normalMatrix * skinnedNormal);
     T = normalize(normalMatrix * skinnedTangent);
+    B = normalize(normalMatrix * skinnedBitangent);
 
 #else
 
@@ -88,14 +95,14 @@ void main()
 
     N = normalize(normalMatrix * aNormal);
     T = normalize(normalMatrix * aTangent);
+    B = normalize(normalMatrix * aBitangent);
 
 #endif
 
     Normal = N;
 
     T = normalize(T - dot(T, N) * N);
-
-    vec3 B = cross(N, T);
+    B = normalize(B - dot(B, N) * N - dot(B, T) * T);
 
     TBN = mat3(T, B, N);
 
