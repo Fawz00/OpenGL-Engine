@@ -38,6 +38,16 @@ enum Texture2DFlags : uint32_t {
     HasHeight = 1 << 3,
 };
 
+enum VertexAttributeId : uint32_t {
+    Position = 0,
+    Normal = 1,
+    TexCoords0 = 2,
+    Tangent = 3,
+    Bitangent = 4,
+    BoneIDs = 5,
+    Weights = 6,
+};
+
 class Mesh {
 public:
     // constructor
@@ -54,7 +64,17 @@ public:
     Mesh(Mesh&&) noexcept = default;
     Mesh& operator=(Mesh&&) noexcept = default;
 
-    void Draw(Shader& shader);
+    void draw(Shader& shader);
+
+	// Setters for vertex attributes
+    void setPosition(std::vector<glm::vec3> positions);
+	void setNormals(std::vector<glm::vec3> normals);
+	void setTexCoords(std::uint8_t index, std::vector<glm::vec2> texCoords);
+	void setTangents(std::vector<glm::vec3> tangents);
+	void setBitangents(std::vector<glm::vec3> bitangents);
+
+	void setBoneIDs(std::vector<std::array<int, MAX_BONE_INFLUENCE>> boneIDs);
+	void setWeights(std::vector<std::array<float, MAX_BONE_INFLUENCE>> weights);
 
 private:
     unsigned int VAO, VBO;

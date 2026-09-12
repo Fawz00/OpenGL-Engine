@@ -69,8 +69,8 @@ public:
     void bind();
     static void unbind();
 
-    static void setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type = GL_FLOAT);
-    void setAttr(const std::string& name, GLint size, GLsizei stride, const void* offset, GLenum type);
+    static void setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type = GL_FLOAT, GLboolean normalized = GL_FALSE);
+    void setAttr(const std::string& name, GLint size, GLsizei stride, const void* offset, GLenum type = GL_FLOAT, GLboolean normalized = GL_FALSE);
     static void disableAttr(GLint id);
     void setUInt(const std::string& name, unsigned int value);
     void setInt(const std::string& name, int value);

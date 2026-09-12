@@ -18,7 +18,7 @@ Mesh::~Mesh() {
     }
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::draw(Shader& shader)
 {
     uint32_t flags = 0;
 

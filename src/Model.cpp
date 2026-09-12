@@ -11,7 +11,7 @@ Model::Model(string const& path, ModelMode mode, bool gamma)
 void Model::draw(Shader& shader)
 {
     for (auto& mesh : meshes) {
-        mesh->Draw(shader);
+        mesh->draw(shader);
     }
 }
 

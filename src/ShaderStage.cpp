@@ -1,5 +1,7 @@
 #include "ShaderStage.hpp"
 
+#include "Mesh.hpp"
+
 ShaderStage& ShaderStage::define(const std::string& macro) {
     defines.push_back(macro);
     return *this;
@@ -32,8 +34,7 @@ std::string ShaderStage::preprocessSource(const std::string& source) const {
             versionFound = true;
 
 			// Add user-defined macros after #version
-            for (const auto& def : defines)
-                out << "#define " << def << '\n';
+			buildDefines(out);
 
 			// Reset line numbering
             out << "#line " << (lineCount + 1) << '\n';
@@ -44,14 +45,29 @@ std::string ShaderStage::preprocessSource(const std::string& source) const {
     if (!versionFound) {
         std::ostringstream final;
         final << "#version 330\n"; // default fallback
-        for (const auto& def : defines)
-            final << "#define " << def << '\n';
+		buildDefines(final);
         final << "#line 1\n";
         final << out.str();
         return final.str();
     }
 
     return out.str();
+}
+
+void ShaderStage::buildDefines(std::ostringstream& stream) const {
+    for (const auto& def : defines) {
+        stream << "#define " << def << '\n';
+    }
+
+    if (type == ShaderType::VertexShader) {
+        stream << "#define VERTEX_SHADER\n";
+    } else if (type == ShaderType::FragmentShader) {
+        stream << "#define FRAGMENT_SHADER\n";
+    } else if (type == ShaderType::GeometryShader) {
+        stream << "#define GEOMETRY_SHADER\n";
+    } else if (type == ShaderType::ComputeShader) {
+        stream << "#define COMPUTE_SHADER\n";
+	}
 }
 
 GLint ShaderStage::compile() const {
@@ -76,7 +92,8 @@ GLint ShaderStage::compile() const {
 	}
 
     GLuint shader = glCreateShader(glType);
-	std::string source = preprocessSource(readTextFile(path));
+	std::string sourceRaw = readTextFile(path);
+    std::string source = preprocessSource(sourceRaw);
     const char* src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
@@ -87,7 +104,7 @@ GLint ShaderStage::compile() const {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         Debug::logError("Shader compilation error:\n" + std::string(infoLog) + "\nShader source path: " + path);
-		Debug::logError("Shader source:\n" + source);
+		Debug::logError("Shader source:\n" + sourceRaw);
         throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
     }
     return shader;

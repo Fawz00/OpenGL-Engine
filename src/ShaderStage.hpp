@@ -40,6 +40,7 @@ private:
     std::vector<std::string> defines;
 
     std::string preprocessSource(const std::string& source) const;
+	void buildDefines(std::ostringstream& stream) const;
 
     static std::string readTextFile(const std::string& filePath);
 };

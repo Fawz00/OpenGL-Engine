@@ -78,22 +78,22 @@ void Shader::unbind() {
     glUseProgram(0);
 }
 
-void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type) {
+void Shader::setAttr(GLint id, GLint size, GLsizei stride, const void* offset, GLenum type, GLboolean normalized) {
     glEnableVertexAttribArray(id);
     if (type == GL_INT) {
         glVertexAttribIPointer(id, size, type, stride, offset);
         return;
 	}
-    glVertexAttribPointer(id, size, type, GL_FALSE, stride, offset);
+    glVertexAttribPointer(id, size, type, normalized, stride, offset);
 }
-void Shader::setAttr(const std::string& name, GLint size, GLsizei stride, const void* offset, GLenum type) {
+void Shader::setAttr(const std::string& name, GLint size, GLsizei stride, const void* offset, GLenum type, GLboolean normalized) {
     GLint id = getCachedAttributeLocation(name);
     glEnableVertexAttribArray(id);
     if (type == GL_INT) {
         glVertexAttribIPointer(id, size, type, stride, offset);
         return;
     }
-    glVertexAttribPointer(id, size, type, GL_FALSE, stride, offset);
+    glVertexAttribPointer(id, size, type, normalized, stride, offset);
 }
 
 void Shader::disableAttr(GLint id) {
