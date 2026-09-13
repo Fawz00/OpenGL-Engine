@@ -31,11 +31,6 @@ uniform vec3 uViewPos;
 
 void main()
 {
-    vec3 lightColor = vec3(1.0, 0.85, 0.75) * 0.8;
-
-    vec3 lightDir = normalize(-uLightDir);
-    vec3 viewDir = normalize(uViewPos - Position);
-
     // Texture mapping
     float useDiffuse = float((uTextureFlags & HAS_DIFFUSE) != 0u);
     vec4 color = mix(vec4(1.0), texture(texture_diffuse1, TexCoords), useDiffuse);
@@ -45,6 +40,11 @@ void main()
     if (color.a < 0.1)
         discard;
 #endif
+
+    vec3 lightColor = vec3(1.0, 0.85, 0.75) * 0.8;
+
+    vec3 lightDir = normalize(-uLightDir);
+    vec3 viewDir = normalize(uViewPos - Position);
 
     // Normal mapping
     float useNormal = float((uTextureFlags & HAS_NORMAL) != 0u);

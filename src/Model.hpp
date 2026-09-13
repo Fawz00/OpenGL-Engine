@@ -35,11 +35,11 @@ class Model
 {
 public:
     enum ModelMode : uint32_t {
-		NONE            = 0,
+        NONE            = 0,
         SKINNED         = 1 << 0,
-		NO_TEXTURES     = 1 << 1,
-		NO_TANGENTS     = 1 << 2,
-		FORCE_TRIANGLES = 1 << 3,
+        NO_TEXTURES     = 1 << 1,
+        NO_TANGENTS     = 1 << 2,
+        FORCE_TRIANGLES = 1 << 3,
     };
 
     // constructor, expects a filepath to a 3D model.
@@ -83,13 +83,22 @@ private:
     void loadModel(std::string const& path);
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+    std::vector<Texture2D*> loadMaterialTextures(const aiScene* scene, aiMaterial* mat, aiTextureType type, Texture2D::Texture2DType texType);
     void processNode(aiNode* node, const aiScene* scene);
     void processMesh(aiMesh* mesh, const aiScene* scene);
     void buildNodeParentMap(const aiNode* node, const std::string& parentName);
-    std::vector<Texture2D*> loadMaterialTextures(const aiScene* scene, aiMaterial* mat, aiTextureType type, Texture2D::Texture2DType texType);
 
     // helper functions
-    void setVertexBoneDataToDefault(Vertex& vertex);
-    void setVertexBoneData(Vertex& vertex, int boneID, float weight);
-    void extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+    void setVertexBoneDataToDefault(
+        std::array<int, MAX_BONE_INFLUENCE>& boneIDs,
+        std::array<float, MAX_BONE_INFLUENCE>& weights
+    );
+    void setVertexBoneData(
+        std::array<int, MAX_BONE_INFLUENCE>& boneIDs,
+        std::array<float, MAX_BONE_INFLUENCE>& weights,
+        int boneID, float weight);
+    void extractBoneWeightForVertices(
+        std::vector<std::array<int, MAX_BONE_INFLUENCE>>& boneIDs,
+        std::vector<std::array<float, MAX_BONE_INFLUENCE>>& weights,
+        aiMesh* mesh, const aiScene* scene);
 };

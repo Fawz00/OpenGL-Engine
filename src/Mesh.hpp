@@ -12,17 +12,14 @@
 
 #define MAX_BONE_INFLUENCE 4
 
-struct Vertex {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-    glm::vec3 Tangent;
-    glm::vec3 Bitangent;
+struct VertexAttribute {
+    GLuint location;
+    GLint componentCount;
+    GLenum type;
+    GLboolean normalized;
 
-    //bone indexes which will influence this vertex
-    int m_BoneIDs[MAX_BONE_INFLUENCE];
-    //weights from each bone
-    float m_Weights[MAX_BONE_INFLUENCE];
+    size_t elementSize;
+    std::vector<std::byte> data;
 };
 
 struct SubMesh {
@@ -51,9 +48,11 @@ enum VertexAttributeId : uint32_t {
 class Mesh {
 public:
     // constructor
-    Mesh(std::vector<Vertex> vertices,
+    Mesh(
+        size_t vertexCount,
         std::vector<SubMesh> subMeshes,
-        std::vector<Texture2D*> textures);
+        std::vector<Texture2D*> textures
+    );
     ~Mesh();
 
     // No copy
@@ -61,8 +60,8 @@ public:
     Mesh& operator=(const Mesh&) = delete;
 
     // Move allowed
-    Mesh(Mesh&&) noexcept = default;
-    Mesh& operator=(Mesh&&) noexcept = default;
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other) noexcept;
 
     void draw(Shader& shader);
 
@@ -78,10 +77,25 @@ public:
 
 private:
     unsigned int VAO, VBO;
-    std::vector<Vertex> vertices;
+    size_t vertexCount;
+    std::vector<VertexAttribute> attributes;
     std::vector<SubMesh> subMeshes;
     std::vector<Texture2D*> textures;
 
     // initializes all the buffer objects/arrays
     void setupMesh();
+
+    // Rebuilds interleaved VBO from active attributes
+    void rebuildVertexBuffer();
+
+    void setAttribute(
+        GLuint location,
+        GLint componentCount,
+        GLenum type,
+        GLboolean normalized,
+        size_t elementSize,
+        std::vector<std::byte> data
+    );
+
+    VertexAttribute* findAttribute(GLuint location);
 };
