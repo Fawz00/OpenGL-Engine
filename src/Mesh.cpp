@@ -99,7 +99,7 @@ void Mesh::setupMesh()
 	// Create EBO for each sub-mesh
     for (auto& sm : subMeshes) {
         glGenBuffers(1, &sm.EBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sm.EBO);
+
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
             sm.indices.size() * sizeof(unsigned int),
             sm.indices.data(),
