@@ -4,8 +4,8 @@
 
 using namespace std;
 
-Model::Model(string const& path, ModelMode mode, bool gamma)
-    : mode(mode), gammaCorrection(gamma)
+Model::Model(string const& path, ImportConfig config)
+    : importConfig(config)
 {
     loadModel(path);
 }
@@ -26,8 +26,8 @@ void Model::loadModel(string const& path)
         aiProcess_Triangulate |
         aiProcess_GenSmoothNormals |
         //aiProcess_FlipUVs |
-        aiProcess_GenNormals |
-        aiProcess_CalcTangentSpace * (!(mode & NO_TANGENTS))
+        aiProcess_GenNormals * (!(importConfig.getNormals() == ConfigOption::Never)) |
+        aiProcess_CalcTangentSpace * (!(importConfig.getTangents() == ConfigOption::Never))
     );
 
     // Check for errors
@@ -81,12 +81,12 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vector<glm::vec3> positions;
     vector<glm::vec3> normals;
-	vector<glm::vec2> texCoords;
-	vector<glm::vec3> tangents;
-	vector<glm::vec3> bitangents;
+    vector<glm::vec2> texCoords;
+    vector<glm::vec3> tangents;
+    vector<glm::vec3> bitangents;
 
-	vector<array<int, MAX_BONE_INFLUENCE>> boneIDs;
-	vector<array<float, MAX_BONE_INFLUENCE>> weights;
+    vector<array<int, MAX_BONE_INFLUENCE>> boneIDs;
+    vector<array<float, MAX_BONE_INFLUENCE>> weights;
 
     vector<unsigned int> triIndices;
     vector<unsigned int> lineIndices;
@@ -94,30 +94,47 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vector<Texture2D*> textures;
 
     // --- Vertex data ---
-	bool hasNormals = mesh->HasNormals();
-	bool hasTexCoords = mesh->HasTextureCoords(0) && !(mode & NO_TEXTURES);
-    bool hasTangents = mesh->HasTangentsAndBitangents() && !(mode & NO_TANGENTS) && hasTexCoords;
-	bool hasBones = mesh->HasBones() && (mode & SKINNED);
+    bool hasPositions = mesh->HasPositions() && !(importConfig.getPositions() == Model::ConfigOption::Never);
+    bool hasNormals   = mesh->HasNormals() && hasPositions && !(importConfig.getNormals() == Model::ConfigOption::Never);
+    bool hasTexCoords = mesh->HasTextureCoords(0) && hasPositions && !(importConfig.getTextures() == Model::ConfigOption::Never);
+    bool hasTangents  = mesh->HasTangentsAndBitangents() && hasPositions && !(importConfig.getTangents() == Model::ConfigOption::Never) && hasTexCoords;
+    bool hasSkinning  = mesh->HasBones() || (importConfig.getSkinning() == Model::ConfigOption::Force);
 
-	positions.reserve(mesh->mNumVertices);
+    if (hasPositions) {
+        modelFeature |= ModelFeature::Positions;
+    }
+    if (hasTexCoords) {
+        modelFeature |= ModelFeature::Textures;
+    }
+    if (hasNormals) {
+        modelFeature |= ModelFeature::Normals;
+    }
+    if (hasTangents) {
+        modelFeature |= ModelFeature::Tangents;
+    }
+    if (hasSkinning) {
+        modelFeature |= ModelFeature::Skinning;
+    }
+
+    positions.reserve(mesh->mNumVertices);
     if (hasNormals) {
         normals.reserve(mesh->mNumVertices);
-	}
+    }
     if (hasTexCoords) {
         texCoords.reserve(mesh->mNumVertices);
     }
     if (hasTangents) {
-		tangents.reserve(mesh->mNumVertices);
-		bitangents.reserve(mesh->mNumVertices);
-	}
+        tangents.reserve(mesh->mNumVertices);
+        bitangents.reserve(mesh->mNumVertices);
+    }
 
-    if (hasBones) {
+    if (hasSkinning) {
         boneIDs.resize(mesh->mNumVertices);
         weights.resize(mesh->mNumVertices);
     }
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        if (hasBones) {
+        if (hasSkinning) {
             setVertexBoneDataToDefault(boneIDs[i], weights[i]);
         }
 
@@ -133,7 +150,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 mesh->mTextureCoords[0][i].y
             ));
 
-            if (mesh->mTangents && mesh->mBitangents && !(mode & NO_TANGENTS)) {
+            if (mesh->mTangents && mesh->mBitangents && hasTangents) {
                 glm::vec3 N = glm::normalize(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
                 glm::vec3 T = AssimpGLMHelpers::GetGLMVec(mesh->mTangents[i]);
                 glm::vec3 B = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
@@ -160,7 +177,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         const aiFace& face = mesh->mFaces[i];
 
-        if (mode & FORCE_TRIANGLES && face.mNumIndices != 3) {
+        if (importConfig.getTriangulation() == Model::ConfigOption::Force && face.mNumIndices < 3) {
             continue;
         }
 
@@ -176,11 +193,26 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             triIndices.push_back(face.mIndices[1]);
             triIndices.push_back(face.mIndices[2]);
         }
-        // If the face has more than 3 indices, we ignore it for now
+        else
+        {
+            // For faces with more than 3 indices, we can either triangulate or skip them based on the configuration
+            if (importConfig.getTriangulation() == Model::ConfigOption::Force) {
+                // Triangulate the face using a fan method
+                for (unsigned int j = 1; j < face.mNumIndices - 1; j++) {
+                    triIndices.push_back(face.mIndices[0]);
+                    triIndices.push_back(face.mIndices[j]);
+                    triIndices.push_back(face.mIndices[j + 1]);
+                }
+            }
+            else {
+                // Skip the face if triangulation is not forced
+                continue;
+            }
+        }
     }
 
     // --- Textures ---
-    if (!(mode & NO_TEXTURES)) {
+    if (hasTexCoords) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         auto diffuseMaps = loadMaterialTextures(scene, material, aiTextureType_DIFFUSE, Texture2D::Texture2DType::TextureDiffuse);
         auto specularMaps = loadMaterialTextures(scene, material, aiTextureType_SPECULAR, Texture2D::Texture2DType::TextureSpecular);
@@ -201,7 +233,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     // --- Bones ---
-    if (hasBones) {
+    if (hasSkinning) {
         extractBoneWeightForVertices(boneIDs, weights, mesh, scene);
     }
 
@@ -222,25 +254,25 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         mesh->mNumVertices,
         move(subMeshes),
         move(textures)
-	);
-	meshObj.setPosition(move(positions));
+    );
+    meshObj.setPosition(move(positions));
     if (hasNormals) {
         meshObj.setNormals(move(normals));
-	}
+    }
     if (hasTexCoords) {
         meshObj.setTexCoords(0, move(texCoords));
     }
     if (hasTangents) {
         meshObj.setTangents(move(tangents));
-		meshObj.setBitangents(move(bitangents));
-	}
-    if (hasBones) {
+        meshObj.setBitangents(move(bitangents));
+    }
+    if (hasSkinning) {
         meshObj.setBoneIDs(move(boneIDs));
-		meshObj.setWeights(move(weights));
-	}
+        meshObj.setWeights(move(weights));
+    }
 
     meshes.push_back(
-		make_unique<Mesh>(move(meshObj))
+        make_unique<Mesh>(move(meshObj))
     );
 }
 

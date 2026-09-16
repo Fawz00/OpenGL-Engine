@@ -270,5 +270,8 @@
     <ClInclude Include="Resources\Game\shaders\include\color_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="I_InputDevice.hpp">
+      <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -5,13 +5,14 @@
 #include <array>
 #include <memory>
 
+#include "I_InputDevice.hpp"
 #include "Debug.hpp"
 #include "EventBus.hpp"
 #include "SystemEvents.hpp"
 
 class TextInputContext; // forward declaration
 
-class KeyboardInput {
+class KeyboardInput : I_InputDevice {
 public:
     ~KeyboardInput();
 
@@ -50,8 +51,8 @@ private:
 
     TextInputContext* textInputContext = nullptr;
 
-    void init();
-    void update(); // call after glfwPollEvents()
-    void destroy();
+    void init() override;
+    void update() override; // call after glfwPollEvents()
+    void destroy() override;
 	friend class Input;
 };

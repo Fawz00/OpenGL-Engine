@@ -3,10 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <array>
 
+#include "I_InputDevice.hpp"
 #include "EventBus.hpp"
 #include "SystemEvents.hpp"
 
-class MouseInput {
+class MouseInput : I_InputDevice {
 public:
     ~MouseInput();
 
@@ -43,8 +44,8 @@ private:
     double scrollX = 0.0;
     double scrollY = 0.0;
 
-    void init();
-    void update(); // call after glfwPollEvents()
-	void destroy();
+    void init() override;
+    void update() override; // call after glfwPollEvents()
+	void destroy() override;
 	friend class Input;
 };

@@ -15,7 +15,7 @@ void EngineRenderer::onInit() {
 	glm::mat4 mat0 = glm::mat4(1.0f);
 	modelMatrices.push_back(mat0);
 
-	models.push_back(new Model("Resources/Game/models/hatsune_miku.fbx", Model::SKINNED));
+	models.push_back(new Model("Resources/Game/models/hatsune_miku.fbx"));
 	glm::mat4 mat_4 = glm::mat4(1.0f);
 	mat_4 = glm::translate(mat_4, glm::vec3(2.0f, 0.0f, -2.0f));
 	mat_4 = glm::scale(mat_4, glm::vec3(0.01f)); // FBX model is huge
@@ -192,9 +192,6 @@ void EngineRenderer::onUpdate() {
     glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
 
 	shader.bind();
 
@@ -222,7 +219,7 @@ void EngineRenderer::onUpdate() {
 	shader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpace));
 
 	for (int i = 1; i < models.size(); i++) {
-		if ((models[i]->getMode() & Model::ModelMode::SKINNED) == Model::ModelMode::SKINNED) {
+		if (models[i]->getModelFeature() & Model::ModelFeature::Skinning) {
 			animator->updateAnimation(shader);
 		}
 
@@ -244,7 +241,6 @@ void EngineRenderer::onUpdate() {
 	// Render screen quad
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
 
 	// Clear screen
 	glViewport(0, 0, Window::width(), Window::height());

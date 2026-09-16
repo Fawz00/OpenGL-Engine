@@ -195,7 +195,7 @@ xcopy /Y /E "$(ProjectDir)Libraries/dll" "$(OutDir)"</Command>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
@@ -286,7 +286,7 @@ xcopy /Y /E "$(ProjectDir)Libraries/dll" "$(OutDir)"</Command>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
@@ -375,6 +375,7 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="I_InputDevice.hpp" />
     <ClInclude Include="Resources\Game\shaders\include\color_test.h" />
     <ClInclude Include="src\Actor.hpp" />
     <ClInclude Include="src\Animation.hpp" />
