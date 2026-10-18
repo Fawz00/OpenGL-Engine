@@ -1,5 +1,9 @@
 #include "FpsTool.hpp"
 
+#include "Debug.hpp"
+
+std::unordered_map<int, Timer> FpsTool::timers;
+
 void FpsTool::setTargetFps(int fps) {
     if (fps <= 0) {
         throw std::invalid_argument("FPS must be greater than 0");
@@ -33,6 +37,30 @@ void FpsTool::endFrame() {
 
 void FpsTool::enableLimit(bool enable) {
     limitFps = enable;
+}
+
+void FpsTool::startTimer(int id)
+{
+    auto& timer = timers[id];
+    if (timer.active) {
+        Debug::logWarn("Timer with ID " + std::to_string(id) + " is already running.");
+    }
+    timer.startTime = clock::now();
+	timer.active = true;
+}
+
+std::chrono::nanoseconds FpsTool::stopTimer(int id)
+{
+    auto it = timers.find(id);
+    if (it == timers.end() || !it->second.active) {
+        Debug::logWarn("Timer with ID " + std::to_string(id) + " is not running.");
+        return nanoseconds{ 0 };
+    }
+    auto& timer = it->second;
+    auto endTime = clock::now();
+    auto duration = std::chrono::duration_cast<nanoseconds>(endTime - timer.startTime);
+    timer.active = false;
+    return duration;
 }
 
 void FpsTool::resetTimer() {

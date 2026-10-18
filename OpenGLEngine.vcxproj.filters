@@ -145,6 +145,15 @@
     <ClCompile Include="src\AudioSystem.cpp">
       <Filter>Source Files\Engine\Core\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\CharacterInput.cpp">
+      <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GLExtensionLoader.cpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MeshRenderer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stb_image.h">
@@ -267,11 +276,20 @@
     <ClInclude Include="src\AudioSystem.hpp">
       <Filter>Source Files\Engine\Core\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="Resources\Game\shaders\include\color_test.h">
+    <ClInclude Include="Resources\Game\shaders\include\color_test.glsl">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="I_InputDevice.hpp">
+    <ClInclude Include="src\CharacterInput.hpp">
       <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\I_InputDevice.hpp">
+      <Filter>Source Files\Engine\Core\System\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GLExtensionLoader.hpp">
+      <Filter>Source Files\Engine\Core\System</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MeshRenderer.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

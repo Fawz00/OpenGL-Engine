@@ -4,12 +4,12 @@
 
 	<PropertyGroup Label="UserMacros" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-		<LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+		<IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGLEngine\Libraries\include;$(IncludePath)</IncludePath>
+		<LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGLEngine\Libraries\lib;$(LibraryPath)</LibraryPath>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\include;$(IncludePath)</IncludePath>
-		<LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGL Engine\Libraries\lib;$(LibraryPath)</LibraryPath>
+		<IncludePath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGLEngine\Libraries\include;$(IncludePath)</IncludePath>
+		<LibraryPath>C:\Users\fawwazhp\Documents\Project\VisualStudio_project\OpenGLEngine\Libraries\lib;$(LibraryPath)</LibraryPath>
 	</PropertyGroup>
 	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<ClCompile>

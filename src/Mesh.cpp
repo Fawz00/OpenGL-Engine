@@ -447,4 +447,9 @@ void Mesh::rebuildVertexBuffer()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    for (const auto& attribute : attributes)
+    {
+        Shader::disableAttr(attribute.location);
+    }
 }

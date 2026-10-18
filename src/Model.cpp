@@ -1,5 +1,6 @@
 ﻿#include "Model.hpp"
 
+#include <cmath>
 #include <array>
 
 using namespace std;
@@ -21,18 +22,23 @@ void Model::loadModel(string const& path)
 {
     // Read file via ASSIMP
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(
-        path,
-        aiProcess_Triangulate |
-        aiProcess_GenSmoothNormals |
-        //aiProcess_FlipUVs |
-        aiProcess_GenNormals * (!(importConfig.getNormals() == ConfigOption::Never)) |
-        aiProcess_CalcTangentSpace * (!(importConfig.getTangents() == ConfigOption::Never))
-    );
+
+    const bool wantNormals = !(importConfig.getNormals() == ConfigOption::Never);
+    const bool wantTangents = !(importConfig.getTangents() == ConfigOption::Never);
+
+    unsigned int postProcessFlags = aiProcess_Triangulate;
+    if (wantNormals) {
+        postProcessFlags |= aiProcess_GenSmoothNormals | aiProcess_GenNormals;
+    }
+    if (wantTangents) {
+        postProcessFlags |= aiProcess_CalcTangentSpace;
+    }
+
+    const aiScene* scene = importer.ReadFile(path, postProcessFlags);
 
     // Check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+        Debug::logError("ERROR::ASSIMP:: " + std::string(importer.GetErrorString()) + "\n");
         return;
     }
 
@@ -47,7 +53,7 @@ void Model::loadModel(string const& path)
         processNode(scene->mRootNode, scene);
     }
     catch (const std::exception& e) {
-        std::cout << "ERROR::MODEL:: " << e.what() << std::endl;
+        Debug::logError("ERROR::MODEL:: " + std::string(e.what()) + "\n");
         return;
     }
 }
@@ -93,53 +99,55 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vector<unsigned int> pointIndices;
     vector<Texture2D*> textures;
 
-    // --- Vertex data ---
-    bool hasPositions = mesh->HasPositions() && !(importConfig.getPositions() == Model::ConfigOption::Never);
-    bool hasNormals   = mesh->HasNormals() && hasPositions && !(importConfig.getNormals() == Model::ConfigOption::Never);
-    bool hasTexCoords = mesh->HasTextureCoords(0) && hasPositions && !(importConfig.getTextures() == Model::ConfigOption::Never);
-    bool hasTangents  = mesh->HasTangentsAndBitangents() && hasPositions && !(importConfig.getTangents() == Model::ConfigOption::Never) && hasTexCoords;
-    bool hasSkinning  = mesh->HasBones() || (importConfig.getSkinning() == Model::ConfigOption::Force);
+    // --- Feature resolution ---
+    bool hasPositions = (mesh->HasPositions() || importConfig.getPositions() == Model::ConfigOption::Force)
+        && !(importConfig.getPositions() == Model::ConfigOption::Never);
 
-    if (hasPositions) {
-        modelFeature |= ModelFeature::Positions;
-    }
-    if (hasTexCoords) {
-        modelFeature |= ModelFeature::Textures;
-    }
-    if (hasNormals) {
-        modelFeature |= ModelFeature::Normals;
-    }
-    if (hasTangents) {
-        modelFeature |= ModelFeature::Tangents;
-    }
-    if (hasSkinning) {
-        modelFeature |= ModelFeature::Skinning;
-    }
+    bool hasNormals = (mesh->HasNormals() || importConfig.getNormals() == Model::ConfigOption::Force)
+        && hasPositions
+        && !(importConfig.getNormals() == Model::ConfigOption::Never);
+
+    bool hasTexCoords = mesh->HasTextureCoords(0) && hasPositions
+        && !(importConfig.getTextures() == Model::ConfigOption::Never);
+
+    bool hasNativeTangents = mesh->HasTangentsAndBitangents() && hasTexCoords;
+    bool hasTangents = (hasNativeTangents || importConfig.getTangents() == Model::ConfigOption::Force)
+        && hasPositions
+        && !(importConfig.getTangents() == Model::ConfigOption::Never);
+
+    bool hasRig = mesh->HasBones() || (importConfig.getRig() == Model::ConfigOption::Force);
+
+    if (hasPositions) modelFeature |= ModelFeature::Positions;
+    if (hasTexCoords) modelFeature |= ModelFeature::Textures;
+    if (hasNormals)   modelFeature |= ModelFeature::Normals;
+    if (hasTangents)  modelFeature |= ModelFeature::Tangents;
+    if (hasRig)  modelFeature |= ModelFeature::Rig;
 
     positions.reserve(mesh->mNumVertices);
-    if (hasNormals) {
-        normals.reserve(mesh->mNumVertices);
-    }
-    if (hasTexCoords) {
-        texCoords.reserve(mesh->mNumVertices);
-    }
+    if (hasNormals)   normals.reserve(mesh->mNumVertices);
+    if (hasTexCoords) texCoords.reserve(mesh->mNumVertices);
     if (hasTangents) {
         tangents.reserve(mesh->mNumVertices);
         bitangents.reserve(mesh->mNumVertices);
     }
-
-    if (hasSkinning) {
+    if (hasRig) {
         boneIDs.resize(mesh->mNumVertices);
         weights.resize(mesh->mNumVertices);
     }
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        if (hasSkinning) {
+        if (hasRig) {
             setVertexBoneDataToDefault(boneIDs[i], weights[i]);
         }
 
-        positions.push_back(AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]));
-        if (hasNormals) {
+        if (mesh->HasPositions()) {
+            positions.push_back(AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]));
+        }
+        else if (hasPositions) {
+            positions.push_back(glm::vec3(0.0f));
+        }
+
+        if (mesh->HasNormals()) {
             normals.push_back(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
         }
 
@@ -150,21 +158,14 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 mesh->mTextureCoords[0][i].y
             ));
 
-            if (mesh->mTangents && mesh->mBitangents && hasTangents) {
+            if (mesh->mTangents && mesh->mBitangents && hasNativeTangents) {
                 glm::vec3 N = glm::normalize(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
                 glm::vec3 T = AssimpGLMHelpers::GetGLMVec(mesh->mTangents[i]);
                 glm::vec3 B = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
 
-                // Ensure T is orthogonal to N.
-                // Sometimes assimp messes this up.
-
-                // Gram–Schmidt orthogonalize
                 T = glm::normalize(T - N * glm::dot(N, T));
 
-                // Calculate handedness
                 float handedness = (glm::dot(glm::cross(N, T), B) < 0.0f) ? -1.0f : 1.0f;
-
-                // Recompute B
                 B = glm::cross(N, T) * handedness;
 
                 tangents.push_back(T);
@@ -193,11 +194,8 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             triIndices.push_back(face.mIndices[1]);
             triIndices.push_back(face.mIndices[2]);
         }
-        else
-        {
-            // For faces with more than 3 indices, we can either triangulate or skip them based on the configuration
+        else {
             if (importConfig.getTriangulation() == Model::ConfigOption::Force) {
-                // Triangulate the face using a fan method
                 for (unsigned int j = 1; j < face.mNumIndices - 1; j++) {
                     triIndices.push_back(face.mIndices[0]);
                     triIndices.push_back(face.mIndices[j]);
@@ -205,10 +203,23 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 }
             }
             else {
-                // Skip the face if triangulation is not forced
                 continue;
             }
         }
+    }
+
+	// --- Compute normals if not present ---
+    if (hasNormals && !mesh->HasNormals()) {
+        normals.assign(mesh->mNumVertices, glm::vec3(0.0f));
+        computeFaceNormals(normals, positions, triIndices);
+    }
+
+	// --- Generate tangents and bitangents if not present ---
+    if (hasTangents && !hasNativeTangents) {
+		Debug::logWarn("Model::processMesh: Tangents and bitangents are not present in the mesh. Generating arbitrary tangents and bitangents.\n");
+        tangents.assign(mesh->mNumVertices, glm::vec3(0.0f));
+        bitangents.assign(mesh->mNumVertices, glm::vec3(0.0f));
+        generateArbitraryTangents(tangents, bitangents, normals, mesh->mNumVertices);
     }
 
     // --- Textures ---
@@ -233,21 +244,29 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     // --- Bones ---
-    if (hasSkinning) {
+    if (hasRig) {
         extractBoneWeightForVertices(boneIDs, weights, mesh, scene);
+
+		// If rigging is forced and no bones are present, assign all vertices to a single root bone
+        if (importConfig.getRig() == Model::ConfigOption::Force) {
+            int rootBoneID = -1;
+            for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
+                if (boneIDs[v][0] == -1) {
+                    if (rootBoneID == -1) {
+                        rootBoneID = ensureRootBoneInfo();
+                    }
+                    boneIDs[v][0] = rootBoneID;
+                    weights[v][0] = 1.0f;
+                }
+            }
+        }
     }
 
     // --- Submeshes ---
     vector<SubMesh> subMeshes;
-    if (!triIndices.empty()) {
-        subMeshes.push_back({ move(triIndices), GL_TRIANGLES });
-    }
-    if (!lineIndices.empty()) {
-        subMeshes.push_back({ move(lineIndices), GL_LINES });
-    }
-    if (!pointIndices.empty()) {
-        subMeshes.push_back({ move(pointIndices), GL_POINTS });
-    }
+    if (!triIndices.empty())   subMeshes.push_back({ move(triIndices), GL_TRIANGLES });
+    if (!lineIndices.empty())  subMeshes.push_back({ move(lineIndices), GL_LINES });
+    if (!pointIndices.empty()) subMeshes.push_back({ move(pointIndices), GL_POINTS });
 
     // --- Create single Mesh with multiple submeshes ---
     Mesh meshObj(
@@ -256,24 +275,18 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         move(textures)
     );
     meshObj.setPosition(move(positions));
-    if (hasNormals) {
-        meshObj.setNormals(move(normals));
-    }
-    if (hasTexCoords) {
-        meshObj.setTexCoords(0, move(texCoords));
-    }
+    if (hasNormals)   meshObj.setNormals(move(normals));
+    if (hasTexCoords) meshObj.setTexCoords(0, move(texCoords));
     if (hasTangents) {
         meshObj.setTangents(move(tangents));
         meshObj.setBitangents(move(bitangents));
     }
-    if (hasSkinning) {
+    if (hasRig) {
         meshObj.setBoneIDs(move(boneIDs));
         meshObj.setWeights(move(weights));
     }
 
-    meshes.push_back(
-        make_unique<Mesh>(move(meshObj))
-    );
+    meshes.push_back(make_unique<Mesh>(move(meshObj)));
 }
 
 vector<Texture2D*> Model::loadMaterialTextures(
@@ -404,4 +417,71 @@ void Model::extractBoneWeightForVertices(
             setVertexBoneData(boneIDs[vertexId], weights[vertexId], boneID, weight);
         }
     }
+}
+
+void Model::computeFaceNormals(
+    std::vector<glm::vec3>& normals,
+    const std::vector<glm::vec3>& positions,
+    const std::vector<unsigned int>& triIndices)
+{
+    for (size_t f = 0; f + 2 < triIndices.size(); f += 3) {
+        unsigned int i0 = triIndices[f];
+        unsigned int i1 = triIndices[f + 1];
+        unsigned int i2 = triIndices[f + 2];
+
+        const glm::vec3& p0 = positions[i0];
+        const glm::vec3& p1 = positions[i1];
+        const glm::vec3& p2 = positions[i2];
+
+        glm::vec3 faceNormal = glm::cross(p1 - p0, p2 - p0);
+
+        normals[i0] += faceNormal;
+        normals[i1] += faceNormal;
+        normals[i2] += faceNormal;
+    }
+
+    for (auto& n : normals) {
+        float lenSq = glm::dot(n, n);
+        n = (lenSq > 1e-12f) ? (n / std::sqrt(lenSq)) : glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+}
+
+void Model::generateArbitraryTangents(
+    std::vector<glm::vec3>& tangents,
+    std::vector<glm::vec3>& bitangents,
+    const std::vector<glm::vec3>& normals,
+    size_t vertexCount)
+{
+    static const glm::vec3 kWorldUp(0.0f, 1.0f, 0.0f);
+    static const glm::vec3 kWorldRight(1.0f, 0.0f, 0.0f);
+
+    for (size_t i = 0; i < vertexCount; i++) {
+        glm::vec3 n = (i < normals.size()) ? normals[i] : glm::vec3(0.0f, 1.0f, 0.0f);
+        if (glm::dot(n, n) < 1e-12f) {
+            n = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+
+        glm::vec3 reference = (std::abs(glm::dot(n, kWorldUp)) > 0.99f) ? kWorldRight : kWorldUp;
+
+        glm::vec3 t = glm::normalize(glm::cross(reference, n));
+        glm::vec3 b = glm::cross(n, t);
+
+        tangents[i] = t;
+        bitangents[i] = b;
+    }
+}
+
+int Model::ensureRootBoneInfo()
+{
+    auto it = m_BoneInfoMap.find(m_RootNodeName);
+    if (it != m_BoneInfoMap.end()) {
+        return it->second.id;
+    }
+
+    int id = m_BoneCounter++;
+    m_BoneInfoMap[m_RootNodeName] = BoneInfo{ id, glm::mat4(1.0f) };
+
+	Debug::logWarn("Model::ensureRootBoneInfo: No bones found in the model. Created a root bone with name '" + m_RootNodeName + "' and ID " + std::to_string(id) + ".\n");
+
+    return id;
 }

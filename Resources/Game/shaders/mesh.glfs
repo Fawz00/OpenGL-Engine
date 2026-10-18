@@ -58,7 +58,7 @@ void main()
     );
 
 	// Ambient
-    vec3 ambient = vec3(0.5) * color.rgb;
+    vec3 ambient = vec3(0.4) * color.rgb;
 
 	// diffuse 
     float diff = max(dot(norm, lightDir), 0.0);
@@ -68,34 +68,68 @@ void main()
     vec4 fragPosLightSpace = FragPosLightSpace;
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-
-    float closestDepth = 0.0;
-    float samples = 0.0;
-    float pcfRadius = 1.0 / textureSize(shadowMap, 0).x;
-    float bias = 1.73205080757 * pcfRadius;
     float currentDepth = projCoords.z;
-    float shadow = 1.0;
 
-    for(int x = -1; x <= 1; ++x)
+    // Shadow-map texel size
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
+
+    // Bias
+    float bias = 1.73205080757 * texelSize.x;
+    float biasedDepth = currentDepth - bias;
+
+    int pcfSampleRadius = 1;
+    float kernelScale = 1.312;
+    float penumbraScale = 0.0025;
+
+    float shadowSum = 0.0;
+    float weightSum = 0.0;
+    for (int x = -pcfSampleRadius; x <= pcfSampleRadius; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for (int y = -pcfSampleRadius; y <= pcfSampleRadius; ++y)
         {
-            float sampleDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * pcfRadius).r;
+            vec2 offset = vec2(x, y);
 
-            closestDepth += step(currentDepth - bias, sampleDepth);
-            samples += 1.0;
+            // Distance from the center of the kernel.
+            float kernelDistance = length(offset);
+
+            // Sample shadow map.
+            vec2 sampleUV =
+                projCoords.xy +
+                offset * texelSize * kernelScale;
+
+            float sampleDepth =
+                texture(shadowMap, sampleUV).r;
+
+            // Normal hard-shadow comparison.
+            float hardShadow =
+                step(biasedDepth, sampleDepth);
+
+            // Expanded depth threshold.
+            float softShadow =
+                step(
+                    biasedDepth,
+                    sampleDepth + kernelDistance * penumbraScale
+                );
+
+            float same =
+                1.0 - abs(hardShadow - softShadow); // XNOR
+
+            shadowSum += hardShadow * softShadow; // AND
+            weightSum += same;
         }
     }
 
-    float shadowMask = (
+    float shadow = shadowSum / max(weightSum, 1.0);
+
+    float shadowMask =
         step(currentDepth, 1.0) *
         step(projCoords.x, 1.0) *
         step(0.0, projCoords.x) *
         step(projCoords.y, 1.0) *
-        step(0.0, projCoords.y)
-    );
+        step(0.0, projCoords.y);
 
-    shadow = mix(1.0, closestDepth / samples, shadowMask);
+    shadow = mix(1.0, shadow, shadowMask);
+
     diff *= shadow;
 #endif
     

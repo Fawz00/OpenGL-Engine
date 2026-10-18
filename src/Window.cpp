@@ -13,9 +13,12 @@ void Window::create(int width, int height, const std::string& title, bool maximi
     vsync = vsync_flag;
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+    //glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -63,13 +66,13 @@ void Window::create(int width, int height, const std::string& title, bool maximi
 void Window::setupCursors() {
     if (!window) return;
     loadCursor(cursorArrow, "Resources/Game/textures/cursors/arrow.png", 0, 0);
-    loadCursor(cursorHand, "Resources/Game/textures/cursors/hand.png", 8, 0);
-    loadCursor(cursorText, "Resources/Game/textures/cursors/text.png", 8, 8);
-    loadCursor(cursorResizeEW, "Resources/Game/textures/cursors/resize_ew.png", 8, 8);
-    loadCursor(cursorResizeNS, "Resources/Game/textures/cursors/resize_ns.png", 8, 8);
-    loadCursor(cursorResizeNWSE, "Resources/Game/textures/cursors/resize_nwse.png", 8, 8);
-    loadCursor(cursorResizeNESW, "Resources/Game/textures/cursors/resize_nesw.png", 8, 8);
-    loadCursor(cursorMove, "Resources/Game/textures/cursors/move.png", 16, 16);
+    loadCursor(cursorHand, "Resources/Game/textures/cursors/hand.png", 11, 2);
+    loadCursor(cursorText, "Resources/Game/textures/cursors/text.png", 15, 15);
+    loadCursor(cursorResizeEW, "Resources/Game/textures/cursors/resize_ew.png", 15, 15);
+    loadCursor(cursorResizeNS, "Resources/Game/textures/cursors/resize_ns.png", 15, 15);
+    loadCursor(cursorResizeNWSE, "Resources/Game/textures/cursors/resize_nwse.png", 15, 15);
+    loadCursor(cursorResizeNESW, "Resources/Game/textures/cursors/resize_nesw.png", 15, 15);
+    loadCursor(cursorMove, "Resources/Game/textures/cursors/move.png", 0, 0);
 
     // Try to load custom cursor
     if (cursorArrow) {

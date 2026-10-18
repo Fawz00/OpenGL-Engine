@@ -7,8 +7,8 @@ void EngineRenderer::onInit() {
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
 
-	shadowMap = new RenderTexture(8192, 8192);
-	shadowMap->useDepthTexture(Texture2D::FilterNearest);
+	shadowMap = new RenderTexture(2048, 2048);
+	shadowMap->useDepthTexture(Texture2D::FilterLinear);
 
 	// Models and their matrices
 	models.push_back(new Model("Resources/Game/models/cube.obj"));
@@ -38,6 +38,12 @@ void EngineRenderer::onInit() {
 	mat5 = glm::scale(mat5, glm::vec3(0.01f)); // Sponza model is huge
 	modelMatrices.push_back(mat5);
 
+	models.push_back(new Model("Resources/Game/models/simple.obj"));
+	glm::mat4 mat6 = glm::mat4(1.0f);
+	mat6 = glm::translate(mat6, glm::vec3(20.0f, 0.0f, 0.0f));
+	mat6 = glm::scale(mat6, glm::vec3(0.5f));
+	modelMatrices.push_back(mat6);
+
 	mixamoRetarget = new AnimationRetarget("Resources/Game/models/mixamo_retarget.json", AnimationRetarget::Mode::Strict);
 	danceAnimation = new Animation("Resources/Game/models/Happy.fbx", models[1], mixamoRetarget);
 	animator = new Animator(danceAnimation);
@@ -54,23 +60,23 @@ void EngineRenderer::onInit() {
 	skybox = new TextureCubeMap(skyboxFaces, TextureCubeMap::Skybox);
 
 	skyboxShader
-		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/skybox_vertex.glsl")
-		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/skybox_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/skybox.glvs")
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/skybox.glfs")
 		.link();
 
 	shader
-		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh_vertex.glsl", {"SKINNED", "SHADOW_MAPPING"})
-		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh_fragment.glsl", {"ALPHA_TEST", "SHADOW_MAPPING"})
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh.glvs", {"SKINNED", "SHADOW_MAPPING"})
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh.glfs", {"ALPHA_TEST", "SHADOW_MAPPING"})
 		.link();
 
 	quadShader
-		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/quad_vertex.glsl")
-		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/quad_fragment.glsl")
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/quad.glvs")
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/quad.glfs")
 		.link();
 
 	shadowShader
-		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh_vertex.glsl", {"SKINNED"})
-		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh_simple_fragment.glsl", {"ALPHA_TEST"})
+		.attachShader(ShaderType::VertexShader, "Resources/Game/shaders/mesh.glvs", {"SKINNED"})
+		.attachShader(ShaderType::FragmentShader, "Resources/Game/shaders/mesh_simple.glfs", {"ALPHA_TEST"})
 		.link();
 
 	camera = new Camera();
@@ -82,8 +88,8 @@ void EngineRenderer::onInit() {
 
 	lightCamera = new Camera();
 	lightCamera->setPivotDistance(1.0f);
-	lightCamera->setRotation(-76.0f, -27.0f, 0.0f);
-	lightCamera->setOrthographic(100.0f, -100.0f, 100.0f);
+	lightCamera->setRotation(-78.0f, -27.0f, 0.0f);
+	lightCamera->setOrthographic(50.0f, -50.0f, 50.0f);
 	lightCamera->setAspectRatio(1, 1);
 	lightCamera->setRotationMode(Camera::ROTATION_FREE);
 
@@ -98,10 +104,6 @@ void EngineRenderer::onWindowResize() {
 
 void EngineRenderer::onUpdate() {
     camera->setRotation(-((Input::mouse.getMouseY()/Window::height())-0.5f)*180.0f, Input::mouse.getMouseX()*360.0f/Window::width(), 0.0f);
-
-	if (Input::mouse.isButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-		Debug::log("Mouse X: " + std::to_string(Input::mouse.getMouseX()) + " Y: " + std::to_string(Input::mouse.getMouseY()));
-	}
 
 	if (Input::keyboard.isKeyDown(GLFW_KEY_W)) {
 		glm::vec3 forward = camera->getForward();
@@ -219,7 +221,7 @@ void EngineRenderer::onUpdate() {
 	shader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpace));
 
 	for (int i = 1; i < models.size(); i++) {
-		if (models[i]->getModelFeature() & Model::ModelFeature::Skinning) {
+		if (models[i]->getModelFeature() & Model::ModelFeature::Rig) {
 			animator->updateAnimation(shader);
 		}
 

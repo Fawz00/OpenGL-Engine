@@ -49,7 +49,7 @@ public:
             ImportConfig& setTextures(ConfigOption option) { textures = option; return *this; }
             ImportConfig& setNormals(ConfigOption option) { normals = option; return *this; }
             ImportConfig& setTangents(ConfigOption option) { tangents = option; return *this; }
-            ImportConfig& setSkinning(ConfigOption option) { skinning = option; return *this; }
+            ImportConfig& setRig(ConfigOption option) { rig = option; return *this; }
             ImportConfig& setTriangulation(ConfigOption option) { triangulation = option; return *this; }
             ImportConfig& setLines(ConfigOption option) { lines = option; return *this; }
             ImportConfig& setPoints(ConfigOption option) { points = option; return *this; }
@@ -61,7 +61,7 @@ public:
             ConfigOption getTextures() const { return textures; }
             ConfigOption getNormals() const { return normals; }
             ConfigOption getTangents() const { return tangents; }
-            ConfigOption getSkinning() const { return skinning; }
+            ConfigOption getRig() const { return rig; }
             ConfigOption getTriangulation() const { return triangulation; }
             ConfigOption getLines() const { return lines; }
 			ConfigOption getPoints() const { return points; }
@@ -72,7 +72,7 @@ public:
             ConfigOption textures = IfAvailable;
             ConfigOption normals = IfAvailable;
             ConfigOption tangents = IfAvailable;
-            ConfigOption skinning = IfAvailable;
+            ConfigOption rig = IfAvailable;
             ConfigOption triangulation = IfAvailable;
             ConfigOption lines = IfAvailable;
             ConfigOption points = IfAvailable;
@@ -87,12 +87,12 @@ public:
         Textures = 1 << 1,
         Normals = 1 << 2,
         Tangents = 1 << 3,
-        Skinning = 1 << 4,
+        Rig = 1 << 4,
         Animation = 1 << 5,
     };
 
     // constructor, expects a filepath to a 3D model.
-    explicit Model(std::string const& path, ImportConfig config = ImportConfig());
+    Model(std::string const& path, ImportConfig config = ImportConfig());
     ~Model() = default;
 
     // No copy
@@ -126,6 +126,7 @@ private:
     std::unordered_map<std::string, std::string> m_NodeParentMap;
     std::string m_RootNodeName;
     int m_BoneCounter = 0;
+    int ensureRootBoneInfo();
 
     bool gammaCorrection;
 
@@ -146,11 +147,25 @@ private:
     void setVertexBoneData(
         std::array<int, MAX_BONE_INFLUENCE>& boneIDs,
         std::array<float, MAX_BONE_INFLUENCE>& weights,
-        int boneID, float weight);
+        int boneID, float weight
+    );
     void extractBoneWeightForVertices(
         std::vector<std::array<int, MAX_BONE_INFLUENCE>>& boneIDs,
         std::vector<std::array<float, MAX_BONE_INFLUENCE>>& weights,
-        aiMesh* mesh, const aiScene* scene);
+        aiMesh* mesh, const aiScene* scene
+    );
+    // Force-mode fallbacks (mathematically safe defaults)
+    void computeFaceNormals(
+        std::vector<glm::vec3>& normals,
+        const std::vector<glm::vec3>& positions,
+        const std::vector<unsigned int>& triIndices
+    );
+    void generateArbitraryTangents(
+        std::vector<glm::vec3>& tangents,
+        std::vector<glm::vec3>& bitangents,
+        const std::vector<glm::vec3>& normals,
+        size_t vertexCount
+    );
 };
 
 inline Model::ModelFeature operator|(Model::ModelFeature lhs, Model::ModelFeature rhs)

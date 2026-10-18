@@ -40,6 +40,7 @@
     <ProjectGuid>{6429fadf-fef4-48fe-abe2-c58ec76e23f8}</ProjectGuid>
     <RootNamespace>OpenGLEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>OpenGLEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -192,12 +193,14 @@ xcopy /Y /E "$(ProjectDir)Libraries/dll" "$(OutDir)"</Command>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources\Game" "$(OutDir)Resources\Game\"
@@ -215,11 +218,14 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\nlohmann;$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources\Game" "$(OutDir)Resources\Game\"
@@ -283,12 +289,14 @@ xcopy /Y /E "$(ProjectDir)Libraries/dll" "$(OutDir)"</Command>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources\Game" "$(OutDir)Resources\Game\"
@@ -306,11 +314,14 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\include\nlohmann;$(SolutionDir)\Libraries\include\glm;$(SolutionDir)\Libraries\include\assimp;$(SolutionDir)\Libraries\include\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>bullet/Bullet3Collision.lib;bullet/Bullet3Dynamics.lib;bullet/LinearMath.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /E "$(ProjectDir)Resources\Game" "$(OutDir)Resources\Game\"
@@ -341,11 +352,14 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CharacterInput.cpp" />
+    <ClCompile Include="src\GLExtensionLoader.cpp" />
     <ClCompile Include="src\Actor.cpp" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationRetarget.cpp" />
     <ClCompile Include="src\Animator.cpp" />
     <ClCompile Include="src\AudioSystem.cpp" />
+    <ClCompile Include="src\MeshRenderer.cpp" />
     <ClCompile Include="src\RenderTexture.cpp" />
     <ClCompile Include="src\ShaderStage.cpp" />
     <ClCompile Include="src\TextureCubeMap.cpp" />
@@ -375,8 +389,9 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="I_InputDevice.hpp" />
-    <ClInclude Include="Resources\Game\shaders\include\color_test.h" />
+    <ClInclude Include="src\CharacterInput.hpp" />
+    <ClInclude Include="src\GLExtensionLoader.hpp" />
+    <ClInclude Include="Resources\Game\shaders\include\color_test.glsl" />
     <ClInclude Include="src\Actor.hpp" />
     <ClInclude Include="src\Animation.hpp" />
     <ClInclude Include="src\AnimationRetarget.hpp" />
@@ -384,7 +399,9 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="src\AssimpGLMHelpers.hpp" />
     <ClInclude Include="src\AudioSystem.hpp" />
     <ClInclude Include="src\Bone.hpp" />
+    <ClInclude Include="src\I_InputDevice.hpp" />
     <ClInclude Include="src\I_Texture.hpp" />
+    <ClInclude Include="src\MeshRenderer.hpp" />
     <ClInclude Include="src\RenderTexture.hpp" />
     <ClInclude Include="src\ScreenQuad.hpp" />
     <ClInclude Include="src\ShaderStage.hpp" />

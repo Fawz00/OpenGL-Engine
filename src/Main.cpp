@@ -5,6 +5,7 @@
 // Note: Don't change the order of these includes (from some library dependencies)
 #include "ImGuiWindow.hpp"
 #include "Window.hpp"
+#include "GLExtensionLoader.hpp"
 #include "Debug.hpp"
 #include "EngineRenderer.hpp"
 #include "FpsTool.hpp"
@@ -52,9 +53,13 @@ int main()
 		LOG_ERROR("Failed to create window");
 		return -1;
 	}
+	Window::setupCursors(); // Setup custom cursors
 
-	// Setup custom cursors
-	Window::setupCursors();
+	GLExtensionLoader::Initialize(); // Load OpenGL extensions
+	//LOG_INFO("Supported OpenGL extensions:");
+	//for (const auto& ext : GLExtensionLoader::GetExtensions()) {
+	//	Debug::log(ext);
+	//}
 
     // Attach input handlers
 	Input::init();
@@ -69,7 +74,6 @@ int main()
     while (!Window::shouldClose()) {
 		Window::poolEvent();
 
-        // Call glViewport once per resize:
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());
 			EngineRenderer::onWindowResize();

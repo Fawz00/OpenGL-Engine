@@ -26,9 +26,7 @@ void ImGuiWindow::init(GLFWwindow* window) {
 	ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO();
-	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-	io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange; // allow ImGui to request cursors
-	//io.MouseDrawCursor = true;
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange; // allow ImGui to request cursors
 
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -55,7 +53,6 @@ void ImGuiWindow::beginFrame() {
 }
 
 void ImGuiWindow::endFrame() {
-	// Rendering
 	updateMouseCursor();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -83,18 +80,14 @@ void ImGuiWindow::updateMouseCursor() {
 	ImGuiIO& io = ImGui::GetIO();
 	GLFWwindow* win = g_Window;
 	ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-
-	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
-		return;
 	
 	if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
 		//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
 	else
 	{
-		// Use your cursor array from init()
+		ImGui::SetMouseCursor(imgui_cursor);
 		glfwSetCursor(win, myCursors[imgui_cursor] ? myCursors[imgui_cursor] : Window::cursorArrow);
-		//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }
 
@@ -126,7 +119,7 @@ void ImGuiWindow::drawWindow() {
 	// Show statistics window
 	ImGui::Begin("Statistics");
 	ImGui::Text("FPS: %.1f", FpsTool::getFps());
-	ImGui::Text("Frame Time: %.3f ms", Time::getLastDeltaTime() * 1000.0f);
+	ImGui::Text("Frame Time: %.3f ms", Time::getLastDeltaTime(false) * 1000.0f);
 	ImGui::Text("Current Time: %.2f s", Time::getTime());
 	ImGui::Text("Frame count: %d", ImGui::GetFrameCount());
 	ImGui::End();
