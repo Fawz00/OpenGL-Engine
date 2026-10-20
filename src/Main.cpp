@@ -28,6 +28,8 @@ int main()
 	std::cout << "Build Development\n";
 #elif defined(BUILD_SHIPPING)
 	std::cout << "Build Shipping\n";
+#elif defined(BUILD_DEBUG)
+	std::cout << "Build Debug\n";
 #else
 	std::cout << "Build Unknown\n";
 #endif
@@ -36,7 +38,7 @@ int main()
 	Debug::Config config;
 
 	config.timestamp = true;
-	config.source = true;
+	config.sourceFileNameOnly = true;
 	config.threadId = false;
 
 	config.consoleOutput = true;

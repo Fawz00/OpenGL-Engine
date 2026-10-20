@@ -29,7 +29,7 @@ uniform mat3 normalMatrix;
 uniform mat4 lightSpaceMatrix;
 
 #ifdef SKINNED
-    const int MAX_BONES = 100;
+    const int MAX_BONES = 192;
     const int MAX_BONE_INFLUENCE = 4;
 
     layout(std140) uniform Bones {

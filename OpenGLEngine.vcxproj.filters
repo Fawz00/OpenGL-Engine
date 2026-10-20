@@ -46,6 +46,12 @@
     <Filter Include="Source Files\Engine\Core\Audio">
       <UniqueIdentifier>{e213f044-74d6-4070-8c74-e3252a42fe77}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\Animation">
+      <UniqueIdentifier>{d9d75266-fc65-4ec9-8e78-28a28bd6d254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Debug">
+      <UniqueIdentifier>{0d2abcf0-8ff5-4ce3-999e-e7473c0cc49e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\glad.c">
@@ -109,12 +115,6 @@
     <ClCompile Include="src\Model.cpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
-    <ClCompile Include="src\Animation.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Animator.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
-    </ClCompile>
     <ClCompile Include="src\RenderTexture.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
     </ClCompile>
@@ -123,9 +123,6 @@
     </ClCompile>
     <ClCompile Include="src\Actor.cpp">
       <Filter>Source Files\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AnimationRetarget.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClCompile>
     <ClCompile Include="src\ShaderStage.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
@@ -153,6 +150,24 @@
     </ClCompile>
     <ClCompile Include="src\MeshRenderer.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Material.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rig.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animation.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AnimationRetarget.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animator.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\debug\AnimationDebug.cpp">
+      <Filter>Source Files\Engine\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -228,15 +243,6 @@
     <ClInclude Include="src\Model.hpp">
       <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
-    <ClInclude Include="src\Animation.hpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Bone.hpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Animator.hpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
-    </ClInclude>
     <ClInclude Include="src\Window.hpp">
       <Filter>Source Files\Engine\Core\System</Filter>
     </ClInclude>
@@ -251,9 +257,6 @@
     </ClInclude>
     <ClInclude Include="src\Actor.hpp">
       <Filter>Source Files\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\AnimationRetarget.hpp">
-      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
     </ClInclude>
     <ClInclude Include="src\ShaderStage.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
@@ -290,6 +293,27 @@
     </ClInclude>
     <ClInclude Include="src\MeshRenderer.hpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Material.hpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rig.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animation.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimationFormat.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AnimationRetarget.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animator.hpp">
+      <Filter>Source Files\Engine\Core\Renderer\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug\AnimationDebug.hpp">
+      <Filter>Source Files\Engine\Debug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -46,3 +46,9 @@ class EngineRenderer {
 		static void onDestroy();
 		friend int main();
 };
+
+#ifdef BUILD_DEBUG
+#include <memory>
+namespace AnimationDebug { class Tool; }
+extern std::unique_ptr<AnimationDebug::Tool> animDebug;
+#endif

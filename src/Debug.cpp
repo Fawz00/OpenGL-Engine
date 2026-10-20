@@ -267,6 +267,11 @@ namespace {
                 std::memory_order_relaxed
             );
 
+            m_sourceFileNameOnly.store(
+                config.sourceFileNameOnly,
+                std::memory_order_relaxed
+            );
+
             m_threadId.store(
                 config.threadId,
                 std::memory_order_relaxed
@@ -1021,12 +1026,42 @@ namespace {
                 entry.file != nullptr
                 ) {
 
+                const char* sourceFile = entry.file;
+
+                if (
+                    m_sourceFileNameOnly.load(
+                        std::memory_order_relaxed
+                    )
+                    ) {
+                    const char* separator =
+                        std::strrchr(sourceFile, '/');
+
+                    const char* windowsSeparator =
+                        std::strrchr(sourceFile, '\\');
+
+                    if (
+                        windowsSeparator != nullptr
+                        &&
+                        (
+                            separator == nullptr
+                            ||
+                            windowsSeparator > separator
+                            )
+                        ) {
+                        separator = windowsSeparator;
+                    }
+
+                    if (separator != nullptr) {
+                        sourceFile = separator + 1;
+                    }
+                }
+
                 offset += static_cast<std::size_t>(
                     std::snprintf(
                         output + offset,
                         sizeof(output) - offset,
                         "[%s:%u] ",
-                        entry.file,
+                        sourceFile,
                         entry.line
                     )
                     );
@@ -1182,6 +1217,9 @@ namespace {
 
         std::atomic<bool>
             m_source{ true };
+
+        std::atomic<bool>
+            m_sourceFileNameOnly{ false };
 
         std::atomic<bool>
             m_threadId{ true };

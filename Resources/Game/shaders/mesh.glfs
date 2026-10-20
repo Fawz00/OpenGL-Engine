@@ -77,7 +77,7 @@ void main()
     float bias = 1.73205080757 * texelSize.x;
     float biasedDepth = currentDepth - bias;
 
-    int pcfSampleRadius = 1;
+    int pcfSampleRadius = 2;
     float kernelScale = 1.312;
     float penumbraScale = 0.0025;
 

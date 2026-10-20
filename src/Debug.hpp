@@ -39,6 +39,7 @@ namespace Debug {
 
         bool timestamp = true;
         bool source = true;
+        bool sourceFileNameOnly = false;
         bool threadId = true;
 
         // --------------------------------------------------------

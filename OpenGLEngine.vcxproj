@@ -353,14 +353,17 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\CharacterInput.cpp" />
+    <ClCompile Include="src\debug\AnimationDebug.cpp" />
     <ClCompile Include="src\GLExtensionLoader.cpp" />
     <ClCompile Include="src\Actor.cpp" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationRetarget.cpp" />
     <ClCompile Include="src\Animator.cpp" />
     <ClCompile Include="src\AudioSystem.cpp" />
+    <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\MeshRenderer.cpp" />
     <ClCompile Include="src\RenderTexture.cpp" />
+    <ClCompile Include="src\Rig.cpp" />
     <ClCompile Include="src\ShaderStage.cpp" />
     <ClCompile Include="src\TextureCubeMap.cpp" />
     <ClCompile Include="src\Time.cpp" />
@@ -389,7 +392,9 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AnimationFormat.hpp" />
     <ClInclude Include="src\CharacterInput.hpp" />
+    <ClInclude Include="src\debug\AnimationDebug.hpp" />
     <ClInclude Include="src\GLExtensionLoader.hpp" />
     <ClInclude Include="Resources\Game\shaders\include\color_test.glsl" />
     <ClInclude Include="src\Actor.hpp" />
@@ -398,11 +403,12 @@ xcopy /Y /E "$(ProjectDir)Libraries\dll" "$(OutDir)"</Command>
     <ClInclude Include="src\Animator.hpp" />
     <ClInclude Include="src\AssimpGLMHelpers.hpp" />
     <ClInclude Include="src\AudioSystem.hpp" />
-    <ClInclude Include="src\Bone.hpp" />
     <ClInclude Include="src\I_InputDevice.hpp" />
     <ClInclude Include="src\I_Texture.hpp" />
+    <ClInclude Include="src\Material.hpp" />
     <ClInclude Include="src\MeshRenderer.hpp" />
     <ClInclude Include="src\RenderTexture.hpp" />
+    <ClInclude Include="src\Rig.hpp" />
     <ClInclude Include="src\ScreenQuad.hpp" />
     <ClInclude Include="src\ShaderStage.hpp" />
     <ClInclude Include="src\TextureCubeMap.hpp" />

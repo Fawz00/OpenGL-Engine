@@ -1,16 +1,29 @@
 #include "Mesh.hpp"
 
+#include <cstring>
+#include <memory>
 #include <stdexcept>
-#include <array>
+
+namespace {
+    template <typename T>
+    std::vector<std::byte> toBytes(const std::vector<T>& values)
+    {
+        std::vector<std::byte> data(values.size() * sizeof(T));
+        if (!data.empty()) {
+            std::memcpy(data.data(), values.data(), data.size());
+        }
+        return data;
+    }
+}
 
 Mesh::Mesh(
     size_t vertexCount,
     std::vector<SubMesh> subMeshes,
-    std::vector<Texture2D*> textures
+    const Material* material
 )
     : vertexCount(vertexCount),
     subMeshes(std::move(subMeshes)),
-    textures(std::move(textures))
+    m_Material(material)
 {
     setupMesh();
 }
@@ -21,10 +34,13 @@ Mesh::Mesh(Mesh&& other) noexcept
     vertexCount(other.vertexCount),
     attributes(std::move(other.attributes)),
     subMeshes(std::move(other.subMeshes)),
-    textures(std::move(other.textures))
+    m_Material(other.m_Material),
+    m_Dirty(other.m_Dirty),
+    m_CpuDataReleased(other.m_CpuDataReleased)
 {
     other.VAO = 0;
     other.VBO = 0;
+    other.subMeshes.clear();
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept
@@ -41,15 +57,19 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
         vertexCount = other.vertexCount;
         attributes = std::move(other.attributes);
         subMeshes = std::move(other.subMeshes);
-        textures = std::move(other.textures);
+        m_Material = other.m_Material;
+        m_Dirty = other.m_Dirty;
+        m_CpuDataReleased = other.m_CpuDataReleased;
 
         other.VAO = 0;
         other.VBO = 0;
+        other.subMeshes.clear();
     }
     return *this;
 }
 
-Mesh::~Mesh() {
+Mesh::~Mesh()
+{
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
@@ -61,67 +81,46 @@ Mesh::~Mesh() {
 
 void Mesh::draw(Shader& shader)
 {
-    uint32_t flags = 0;
-
-    // bind appropriate textures
-	unsigned int otherNr = 1;
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
-
-    for (unsigned int i = 0; i < textures.size(); i++) {
-        std::string number;
-        std::string name;
-        Texture2D::Texture2DType texType = textures[i]->getType();
-
-        if (texType == Texture2D::Texture2DType::TextureDiffuse) {
-            name = "texture_diffuse";
-            number = std::to_string(diffuseNr++);
-            flags |= HasDiffuse;
-        }
-        else if (texType == Texture2D::Texture2DType::TextureSpecular) {
-            name = "texture_specular";
-            number = std::to_string(specularNr++);
-			flags |= HasSpecular;
-        }
-        else if (texType == Texture2D::Texture2DType::TextureNormal) {
-            name = "texture_normal";
-            number = std::to_string(normalNr++);
-			flags |= HasNormal;
-        }
-        else if (texType == Texture2D::Texture2DType::TextureHeight) {
-            name = "texture_height";
-            number = std::to_string(heightNr++);
-			flags |= HasHeight;
-        }
-        else {
-            name = "texture_other";
-            number = std::to_string(otherNr++);
-        }
-
-        shader.setInt(name + number, i);
-        textures[i]->bind(i);
+    if (m_Material) {
+        m_Material->bind(shader);
+    }
+    else {
+        Material::bindNone(shader);
     }
 
-	// Texture bitmask for shader
-    shader.setUInt("uTextureFlags", flags);
+    drawGeometry();
 
-    // draw mesh
+    // always good practice to set everything back to defaults once configured.
+    Material::unbindAll();
+}
+
+void Mesh::drawGeometry()
+{
+    if (m_Dirty) {
+        upload(false);
+    }
+
     glBindVertexArray(VAO);
-    for (auto& sm : subMeshes) {
+    for (const auto& sm : subMeshes) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sm.EBO);
-        glDrawElements(sm.primitiveType,
-                       static_cast<unsigned int>(sm.indices.size()),
-                       GL_UNSIGNED_INT,
-                       0);
+        glDrawElements(sm.primitiveType, static_cast<GLsizei>(sm.indexCount), GL_UNSIGNED_INT, nullptr);
     }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
 
-	// always good practice to set everything back to defaults once configured.
-    glActiveTexture(GL_TEXTURE0);
-    Texture2D::unbind();
+void Mesh::upload(bool releaseCpuData)
+{
+    if (m_Dirty) {
+        rebuildVertexBuffer();
+        m_Dirty = false;
+    }
+
+    if (releaseCpuData && !m_CpuDataReleased) {
+        for (auto& attribute : attributes) {
+            std::vector<std::byte>().swap(attribute.data);
+        }
+        m_CpuDataReleased = true;
+    }
 }
 
 VertexAttribute* Mesh::findAttribute(GLuint location)
@@ -143,6 +142,12 @@ void Mesh::setAttribute(
     std::vector<std::byte> data
 )
 {
+    if (m_CpuDataReleased) {
+        throw std::logic_error(
+            "Mesh: CPU attribute data was released by upload(true); attributes can no longer be modified."
+        );
+    }
+
     if (data.size() != vertexCount * elementSize) {
         throw std::runtime_error(
             "Vertex attribute data size does not match vertex count."
@@ -165,179 +170,56 @@ void Mesh::setAttribute(
         attributes.push_back(std::move(attribute));
     }
 
-    rebuildVertexBuffer();
+    m_Dirty = true;
 }
 
-// SETTER
-// Position
+// SETTERS ------------------------------------------------------------------
+
 void Mesh::setPosition(std::vector<glm::vec3> positions)
 {
-    std::vector<std::byte> data(
-        positions.size() * sizeof(glm::vec3)
-    );
-
-    std::memcpy(
-        data.data(),
-        positions.data(),
-        data.size()
-    );
-
-    setAttribute(
-        VertexAttributeId::Position,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec3),
-        std::move(data)
-    );
+    setAttribute(VertexAttributeId::Position, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), toBytes(positions));
 }
 
-// Normal
 void Mesh::setNormals(std::vector<glm::vec3> normals)
 {
-    std::vector<std::byte> data(
-        normals.size() * sizeof(glm::vec3)
-    );
-
-    std::memcpy(
-        data.data(),
-        normals.data(),
-        data.size()
-    );
-
-    setAttribute(
-        VertexAttributeId::Normal,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec3),
-        std::move(data)
-    );
+    setAttribute(VertexAttributeId::Normal, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), toBytes(normals));
 }
 
-// UV
-void Mesh::setTexCoords(
-    std::uint8_t index,
-    std::vector<glm::vec2> texCoords
-)
+void Mesh::setTexCoords(std::uint8_t index, std::vector<glm::vec2> texCoords)
 {
-    std::vector<std::byte> data(
-        texCoords.size() * sizeof(glm::vec2)
-    );
-
-    std::memcpy(
-        data.data(),
-        texCoords.data(),
-        data.size()
-    );
-
-    GLuint location = VertexAttributeId::TexCoords0 + index;
-
     setAttribute(
-        location,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec2),
-        std::move(data)
+        VertexAttributeId::TexCoords0 + index,
+        2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), toBytes(texCoords)
     );
 }
 
-// Tangent
 void Mesh::setTangents(std::vector<glm::vec3> tangents)
 {
-    std::vector<std::byte> data(
-        tangents.size() * sizeof(glm::vec3)
-    );
-
-    std::memcpy(
-        data.data(),
-        tangents.data(),
-        data.size()
-    );
-
-    setAttribute(
-        VertexAttributeId::Tangent,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec3),
-        std::move(data)
-    );
+    setAttribute(VertexAttributeId::Tangent, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), toBytes(tangents));
 }
 
-// Bitangent
 void Mesh::setBitangents(std::vector<glm::vec3> bitangents)
 {
-    std::vector<std::byte> data(
-        bitangents.size() * sizeof(glm::vec3)
-    );
-
-    std::memcpy(
-        data.data(),
-        bitangents.data(),
-        data.size()
-    );
-
-    setAttribute(
-        VertexAttributeId::Bitangent,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec3),
-        std::move(data)
-    );
+    setAttribute(VertexAttributeId::Bitangent, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), toBytes(bitangents));
 }
 
-// Bone IDs
-void Mesh::setBoneIDs(
-    std::vector<std::array<int, MAX_BONE_INFLUENCE>> boneIDs
-)
+void Mesh::setBoneIDs(std::vector<std::array<int, MAX_BONE_INFLUENCE>> boneIDs)
 {
-    std::vector<std::byte> data(
-        boneIDs.size() * sizeof(boneIDs[0])
-    );
-
-    std::memcpy(
-        data.data(),
-        boneIDs.data(),
-        data.size()
-    );
-
     setAttribute(
         VertexAttributeId::BoneIDs,
-        4,
-        GL_INT,
-        GL_FALSE,
-        sizeof(boneIDs[0]),
-        std::move(data)
+        MAX_BONE_INFLUENCE, GL_INT, GL_FALSE, sizeof(std::array<int, MAX_BONE_INFLUENCE>), toBytes(boneIDs)
     );
 }
 
-// Weights
-void Mesh::setWeights(
-    std::vector<std::array<float, MAX_BONE_INFLUENCE>> weights
-)
+void Mesh::setWeights(std::vector<std::array<float, MAX_BONE_INFLUENCE>> weights)
 {
-    std::vector<std::byte> data(
-        weights.size() * sizeof(weights[0])
-    );
-
-    std::memcpy(
-        data.data(),
-        weights.data(),
-        data.size()
-    );
-
     setAttribute(
         VertexAttributeId::Weights,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(weights[0]),
-        std::move(data)
+        MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(std::array<float, MAX_BONE_INFLUENCE>), toBytes(weights)
     );
 }
+
+// GPU SETUP ----------------------------------------------------------------
 
 void Mesh::setupMesh()
 {
@@ -346,36 +228,24 @@ void Mesh::setupMesh()
 
     glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // Initially empty.
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        0,
-        nullptr,
-        GL_STATIC_DRAW
-    );
-
-    // Create EBO for each sub-mesh
+    // Create EBO for each sub-mesh, upload indices, then free the CPU copy:
+    // indices are never needed again (draw only needs the count).
     for (auto& sm : subMeshes) {
+        sm.indexCount = static_cast<unsigned int>(sm.indices.size());
+
         glGenBuffers(1, &sm.EBO);
-
-        glBindBuffer(
-            GL_ELEMENT_ARRAY_BUFFER,
-            sm.EBO
-        );
-
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sm.EBO);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            sm.indices.size() * sizeof(unsigned int),
+            static_cast<GLsizeiptr>(sm.indices.size() * sizeof(unsigned int)),
             sm.indices.data(),
             GL_STATIC_DRAW
         );
+
+        std::vector<unsigned int>().swap(sm.indices);
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     glBindVertexArray(0);
 }
 
@@ -386,70 +256,46 @@ void Mesh::rebuildVertexBuffer()
 
     // Calculate stride
     size_t stride = 0;
-
     for (const auto& attribute : attributes)
         stride += attribute.elementSize;
 
-    // Create interleaved buffer
-    std::vector<std::byte> buffer(
-        vertexCount * stride
-    );
+    // Interleave attribute by attribute: the source is read sequentially and no
+    // zero-initialisation pass is paid for the temporary buffer.
+    const size_t totalSize = vertexCount * stride;
+    auto buffer = std::make_unique_for_overwrite<std::byte[]>(totalSize);
 
-    for (size_t vertex = 0; vertex < vertexCount; ++vertex)
-    {
-        size_t offset = 0;
+    size_t offset = 0;
+    for (const auto& attribute : attributes) {
+        const std::byte* src = attribute.data.data();
+        std::byte* dst = buffer.get() + offset;
+        const size_t elementSize = attribute.elementSize;
 
-        for (const auto& attribute : attributes)
-        {
-            std::memcpy(
-                buffer.data()
-                + vertex * stride
-                + offset,
-
-                attribute.data.data()
-                + vertex * attribute.elementSize,
-
-                attribute.elementSize
-            );
-
-            offset += attribute.elementSize;
+        for (size_t v = 0; v < vertexCount; ++v) {
+            std::memcpy(dst + v * stride, src + v * elementSize, elementSize);
         }
+        offset += elementSize;
     }
 
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(totalSize), buffer.get(), GL_STATIC_DRAW);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        buffer.size(),
-        buffer.data(),
-        GL_STATIC_DRAW
-    );
-
-
-    // Configure attributes through Shader class
-    size_t offset = 0;
-
-    for (const auto& attribute : attributes)
-    {
+    // Configure attributes through Shader class (enabled state is stored in the VAO)
+    offset = 0;
+    for (const auto& attribute : attributes) {
         Shader::setAttr(
             attribute.location,
             attribute.componentCount,
-            stride,
+            static_cast<GLsizei>(stride),
             reinterpret_cast<void*>(offset),
             attribute.type,
             attribute.normalized
         );
-
         offset += attribute.elementSize;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    for (const auto& attribute : attributes)
-    {
-        Shader::disableAttr(attribute.location);
-    }
+    // NOTE: the old code called Shader::disableAttr() here, AFTER unbinding the VAO. That ran on
+    // VAO 0 (GL_INVALID_OPERATION in Core profile) and did not affect this mesh, so it was removed.
 }

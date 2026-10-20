@@ -1,9 +1,39 @@
-﻿#include "Model.hpp"
+#include "Model.hpp"
+
+#include <assimp/config.h>
 
 #include <cmath>
+#include <cstring>
 #include <array>
 
 using namespace std;
+
+// State that only lives while a file is imported.
+struct Model::LoadContext {
+    const aiScene* scene = nullptr;
+    ::Rig::Builder rig;                 // collects bones; becomes the immutable Rig at the end
+    vector<int32_t> materialLookup;     // scene material index -> index in m_Materials (-1 = not created)
+    string rootNodeName;
+};
+
+namespace {
+    // aiVector3D is 3 floats when Assimp is built with float precision (default).
+    // In that case a single memcpy replaces a per-vertex loop.
+    void copyVec3(const aiVector3D* src, glm::vec3* dst, size_t count)
+    {
+        if constexpr (sizeof(aiVector3D) == sizeof(glm::vec3) && is_same_v<ai_real, float>) {
+            std::memcpy(dst, src, count * sizeof(glm::vec3));
+        }
+        else {
+            for (size_t i = 0; i < count; ++i) dst[i] = AssimpGLMHelpers::GetGLMVec(src[i]);
+        }
+    }
+}
+
+Model::Model(string const& path)
+    : Model(path, ImportConfig())
+{
+}
 
 Model::Model(string const& path, ImportConfig config)
     : importConfig(config)
@@ -11,10 +41,25 @@ Model::Model(string const& path, ImportConfig config)
     loadModel(path);
 }
 
-void Model::draw(Shader& shader)
+void Model::draw(Shader& shader) const
 {
-    for (auto& mesh : meshes) {
-        mesh->draw(shader);
+    const Material* current = nullptr;
+    bool first = true;
+
+    for (const auto& mesh : meshes) {
+        // Only touch texture state when the material changes between consecutive meshes.
+        const Material* material = mesh->getMaterial();
+        if (first || material != current) {
+            if (material) material->bind(shader);
+            else Material::bindNone(shader);
+            current = material;
+            first = false;
+        }
+        mesh->drawGeometry();
+    }
+
+    if (!first) {
+        Material::unbindAll();
     }
 }
 
@@ -25,13 +70,24 @@ void Model::loadModel(string const& path)
 
     const bool wantNormals = !(importConfig.getNormals() == ConfigOption::Never);
     const bool wantTangents = !(importConfig.getTangents() == ConfigOption::Never);
+    const bool wantRig = !(importConfig.getRig() == ConfigOption::Never);
 
     unsigned int postProcessFlags = aiProcess_Triangulate;
     if (wantNormals) {
-        postProcessFlags |= aiProcess_GenSmoothNormals | aiProcess_GenNormals;
+        // Exactly one of the two: Assimp rejects aiProcess_GenNormals | aiProcess_GenSmoothNormals.
+        // Flat is the default (it is also what the old flag combination effectively produced).
+        postProcessFlags |= (importConfig.getNormalMode() == NormalMode::Smooth)
+            ? aiProcess_GenSmoothNormals
+            : aiProcess_GenNormals;
     }
     if (wantTangents) {
         postProcessFlags |= aiProcess_CalcTangentSpace;
+    }
+    if (wantRig) {
+        // At most MAX_BONE_INFLUENCE influences per vertex, with weights renormalised by Assimp.
+        // Without this, extra weights were dropped and the remaining ones no longer summed to 1.
+        postProcessFlags |= aiProcess_LimitBoneWeights;
+        importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, MAX_BONE_INFLUENCE);
     }
 
     const aiScene* scene = importer.ReadFile(path, postProcessFlags);
@@ -45,46 +101,43 @@ void Model::loadModel(string const& path)
     // Retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('/'));
 
-    m_RootNodeName = scene->mRootNode->mName.C_Str();
-    buildNodeParentMap(scene->mRootNode, "");
+    LoadContext ctx;
+    ctx.scene = scene;
+    ctx.materialLookup.assign(scene->mNumMaterials, -1);
+    ctx.rootNodeName = scene->mRootNode->mName.C_Str();
+    m_Materials.reserve(scene->mNumMaterials);
 
     // Process ASSIMP's root node recursively
     try {
-        processNode(scene->mRootNode, scene);
+        processNode(scene->mRootNode, ctx);
     }
     catch (const std::exception& e) {
         Debug::logError("ERROR::MODEL:: " + std::string(e.what()) + "\n");
         return;
     }
+
+    // Bones are now all registered: build the immutable rig (empty when there are no bones).
+    m_Rig = std::make_shared<const ::Rig>(ctx.rig.build(scene->mRootNode));
+    m_Loaded = true;
 }
 
-void Model::buildNodeParentMap(const aiNode* node, const string& parentName)
-{
-    if (!node) return;
-
-    string name = node->mName.C_Str();
-    m_NodeParentMap[name] = parentName;
-
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        buildNodeParentMap(node->mChildren[i], name);
-    }
-}
-
-void Model::processNode(aiNode* node, const aiScene* scene)
+void Model::processNode(aiNode* node, LoadContext& ctx)
 {
     // Process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        processMesh(mesh, scene);
+        aiMesh* mesh = ctx.scene->mMeshes[node->mMeshes[i]];
+        processMesh(mesh, ctx);
     }
 
     // After we've processed all of the meshes, we then recursively process each of the children nodes
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene);
+        processNode(node->mChildren[i], ctx);
     }
 }
 
-void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+void Model::processMesh(aiMesh* mesh, LoadContext& ctx) {
+    const unsigned int vertexCount = mesh->mNumVertices;
+
     vector<glm::vec3> positions;
     vector<glm::vec3> normals;
     vector<glm::vec2> texCoords;
@@ -97,13 +150,15 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     vector<unsigned int> triIndices;
     vector<unsigned int> lineIndices;
     vector<unsigned int> pointIndices;
-    vector<Texture2D*> textures;
 
     // --- Feature resolution ---
-    bool hasPositions = (mesh->HasPositions() || importConfig.getPositions() == Model::ConfigOption::Force)
+    const bool meshHasPositions = mesh->HasPositions();
+    const bool meshHasNormals = mesh->HasNormals();
+
+    bool hasPositions = (meshHasPositions || importConfig.getPositions() == Model::ConfigOption::Force)
         && !(importConfig.getPositions() == Model::ConfigOption::Never);
 
-    bool hasNormals = (mesh->HasNormals() || importConfig.getNormals() == Model::ConfigOption::Force)
+    bool hasNormals = (meshHasNormals || importConfig.getNormals() == Model::ConfigOption::Force)
         && hasPositions
         && !(importConfig.getNormals() == Model::ConfigOption::Never);
 
@@ -115,50 +170,42 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         && hasPositions
         && !(importConfig.getTangents() == Model::ConfigOption::Never);
 
-    bool hasRig = mesh->HasBones() || (importConfig.getRig() == Model::ConfigOption::Force);
+    // ConfigOption::Never now also disables the rig (it was ignored before when the mesh had bones).
+    bool hasRig = (mesh->HasBones() || importConfig.getRig() == Model::ConfigOption::Force)
+        && !(importConfig.getRig() == Model::ConfigOption::Never);
 
     if (hasPositions) modelFeature |= ModelFeature::Positions;
     if (hasTexCoords) modelFeature |= ModelFeature::Textures;
     if (hasNormals)   modelFeature |= ModelFeature::Normals;
     if (hasTangents)  modelFeature |= ModelFeature::Tangents;
-    if (hasRig)  modelFeature |= ModelFeature::Rig;
+    if (hasRig)       modelFeature |= ModelFeature::Rig;
 
-    positions.reserve(mesh->mNumVertices);
-    if (hasNormals)   normals.reserve(mesh->mNumVertices);
-    if (hasTexCoords) texCoords.reserve(mesh->mNumVertices);
-    if (hasTangents) {
-        tangents.reserve(mesh->mNumVertices);
-        bitangents.reserve(mesh->mNumVertices);
+    // --- Vertex data (conditions hoisted out of the per-vertex loops) ---
+    if (meshHasPositions) {
+        positions.resize(vertexCount);
+        copyVec3(mesh->mVertices, positions.data(), vertexCount);
     }
-    if (hasRig) {
-        boneIDs.resize(mesh->mNumVertices);
-        weights.resize(mesh->mNumVertices);
+    else if (hasPositions) {
+        positions.assign(vertexCount, glm::vec3(0.0f));
     }
 
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        if (hasRig) {
-            setVertexBoneDataToDefault(boneIDs[i], weights[i]);
+    if (hasNormals && meshHasNormals) {
+        normals.resize(vertexCount);
+        copyVec3(mesh->mNormals, normals.data(), vertexCount);
+    }
+
+    if (hasTexCoords) {
+        texCoords.resize(vertexCount);
+        const aiVector3D* uv = mesh->mTextureCoords[0];
+        for (unsigned int i = 0; i < vertexCount; i++) {
+            texCoords[i] = glm::vec2(uv[i].x, uv[i].y);
         }
 
-        if (mesh->HasPositions()) {
-            positions.push_back(AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]));
-        }
-        else if (hasPositions) {
-            positions.push_back(glm::vec3(0.0f));
-        }
+        if (mesh->mTangents && mesh->mBitangents && hasNativeTangents) {
+            tangents.resize(vertexCount);
+            bitangents.resize(vertexCount);
 
-        if (mesh->HasNormals()) {
-            normals.push_back(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
-        }
-
-        // Texture coordinates
-        if (mesh->mTextureCoords[0] && hasTexCoords) {
-            texCoords.push_back(glm::vec2(
-                mesh->mTextureCoords[0][i].x,
-                mesh->mTextureCoords[0][i].y
-            ));
-
-            if (mesh->mTangents && mesh->mBitangents && hasNativeTangents) {
+            for (unsigned int i = 0; i < vertexCount; i++) {
                 glm::vec3 N = glm::normalize(AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]));
                 glm::vec3 T = AssimpGLMHelpers::GetGLMVec(mesh->mTangents[i]);
                 glm::vec3 B = AssimpGLMHelpers::GetGLMVec(mesh->mBitangents[i]);
@@ -168,13 +215,14 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 float handedness = (glm::dot(glm::cross(N, T), B) < 0.0f) ? -1.0f : 1.0f;
                 B = glm::cross(N, T) * handedness;
 
-                tangents.push_back(T);
-                bitangents.push_back(B);
+                tangents[i] = T;
+                bitangents[i] = B;
             }
         }
     }
 
     // --- Indices ---
+    triIndices.reserve(static_cast<size_t>(mesh->mNumFaces) * 3);
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         const aiFace& face = mesh->mFaces[i];
 
@@ -208,57 +256,71 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
-	// --- Compute normals if not present ---
-    if (hasNormals && !mesh->HasNormals()) {
-        normals.assign(mesh->mNumVertices, glm::vec3(0.0f));
+    // --- Compute normals if not present ---
+    if (hasNormals && !meshHasNormals) {
+        normals.assign(vertexCount, glm::vec3(0.0f));
         computeFaceNormals(normals, positions, triIndices);
     }
 
-	// --- Generate tangents and bitangents if not present ---
+    // --- Generate tangents and bitangents if not present ---
     if (hasTangents && !hasNativeTangents) {
-		Debug::logWarn("Model::processMesh: Tangents and bitangents are not present in the mesh. Generating arbitrary tangents and bitangents.\n");
-        tangents.assign(mesh->mNumVertices, glm::vec3(0.0f));
-        bitangents.assign(mesh->mNumVertices, glm::vec3(0.0f));
-        generateArbitraryTangents(tangents, bitangents, normals, mesh->mNumVertices);
+        Debug::logWarn("Model::processMesh: Tangents and bitangents are not present in the mesh. Generating arbitrary tangents and bitangents.\n");
+        tangents.assign(vertexCount, glm::vec3(0.0f));
+        bitangents.assign(vertexCount, glm::vec3(0.0f));
+        generateArbitraryTangents(tangents, bitangents, normals, vertexCount);
     }
 
-    // --- Textures ---
+    // --- Material (textures) ---
+    const Material* material = nullptr;
     if (hasTexCoords) {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        auto diffuseMaps = loadMaterialTextures(scene, material, aiTextureType_DIFFUSE, Texture2D::Texture2DType::TextureDiffuse);
-        auto specularMaps = loadMaterialTextures(scene, material, aiTextureType_SPECULAR, Texture2D::Texture2DType::TextureSpecular);
-
-        // Normal map heuristic
-        auto normalMaps = loadMaterialTextures(scene, material, aiTextureType_NORMALS, Texture2D::Texture2DType::TextureNormal);
-        if (normalMaps.empty()) {
-            // fallback: Some models use height maps as normal maps
-            normalMaps = loadMaterialTextures(scene, material, aiTextureType_HEIGHT, Texture2D::Texture2DType::TextureNormal);
-        }
-
-        auto heightMaps = loadMaterialTextures(scene, material, aiTextureType_DISPLACEMENT, Texture2D::Texture2DType::TextureHeight);
-
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        material = getOrCreateMaterial(ctx, mesh->mMaterialIndex);
     }
 
     // --- Bones ---
     if (hasRig) {
-        extractBoneWeightForVertices(boneIDs, weights, mesh, scene);
+        boneIDs.resize(vertexCount);
+        weights.resize(vertexCount);
+        for (unsigned int i = 0; i < vertexCount; i++) {
+            setVertexBoneDataToDefault(boneIDs[i], weights[i]);
+        }
 
-		// If rigging is forced and no bones are present, assign all vertices to a single root bone
+        extractBoneWeightForVertices(ctx, boneIDs, weights, mesh);
+
+        // If rigging is forced and vertices have no bone, assign them to a single root bone
         if (importConfig.getRig() == Model::ConfigOption::Force) {
             int rootBoneID = -1;
-            for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
+            for (unsigned int v = 0; v < vertexCount; v++) {
                 if (boneIDs[v][0] == -1) {
                     if (rootBoneID == -1) {
-                        rootBoneID = ensureRootBoneInfo();
+                        rootBoneID = ctx.rig.ensureRootBone(ctx.rootNodeName);
                     }
                     boneIDs[v][0] = rootBoneID;
                     weights[v][0] = 1.0f;
                 }
             }
+        }
+    }
+
+    // --- Weight sanity ---
+    // The skinning shader computes sum(w_i * (M_i * p)). If the weights of a vertex sum to less than 1,
+    // the result is scaled toward the world origin, which looks like vertices "stretching to (0,0,0)".
+    // Weights that were dropped (more influences than MAX_BONE_INFLUENCE, bad vertex ids) are the usual cause.
+    if (hasRig) {
+        unsigned int renormalized = 0;
+        for (unsigned int v = 0; v < vertexCount; v++) {
+            float sum = 0.0f;
+            for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+                if (boneIDs[v][i] >= 0) sum += weights[v][i];
+            }
+            if (sum > 0.0f && std::abs(sum - 1.0f) > 1e-3f) {
+                const float inv = 1.0f / sum;
+                for (int i = 0; i < MAX_BONE_INFLUENCE; i++) weights[v][i] *= inv;
+                renormalized++;
+            }
+        }
+        if (renormalized > 0) {
+            Debug::logWarn("Model::processMesh: " + std::to_string(renormalized) + " of " + std::to_string(vertexCount)
+                + " vertices had bone weights that did not sum to 1. They were renormalized.\n");
         }
     }
 
@@ -269,24 +331,65 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     if (!pointIndices.empty()) subMeshes.push_back({ move(pointIndices), GL_POINTS });
 
     // --- Create single Mesh with multiple submeshes ---
-    Mesh meshObj(
-        mesh->mNumVertices,
-        move(subMeshes),
-        move(textures)
-    );
-    meshObj.setPosition(move(positions));
-    if (hasNormals)   meshObj.setNormals(move(normals));
-    if (hasTexCoords) meshObj.setTexCoords(0, move(texCoords));
+    auto meshObj = make_unique<Mesh>(vertexCount, move(subMeshes), material);
+    if (!positions.empty()) meshObj->setPosition(move(positions));
+    if (hasNormals)         meshObj->setNormals(move(normals));
+    if (hasTexCoords)       meshObj->setTexCoords(0, move(texCoords));
     if (hasTangents) {
-        meshObj.setTangents(move(tangents));
-        meshObj.setBitangents(move(bitangents));
+        meshObj->setTangents(move(tangents));
+        meshObj->setBitangents(move(bitangents));
     }
     if (hasRig) {
-        meshObj.setBoneIDs(move(boneIDs));
-        meshObj.setWeights(move(weights));
+        meshObj->setBoneIDs(move(boneIDs));
+        meshObj->setWeights(move(weights));
     }
 
-    meshes.push_back(make_unique<Mesh>(move(meshObj)));
+    // One interleave + one GPU upload per mesh; CPU copies are freed (the Model is read-only).
+    meshObj->upload(true);
+
+    meshes.push_back(move(meshObj));
+}
+
+const Material* Model::getOrCreateMaterial(LoadContext& ctx, unsigned int materialIndex)
+{
+    if (materialIndex >= ctx.materialLookup.size()) {
+        return nullptr;
+    }
+
+    int32_t& lookup = ctx.materialLookup[materialIndex];
+    if (lookup >= 0) {
+        return m_Materials[lookup].get();
+    }
+
+    const aiScene* scene = ctx.scene;
+    aiMaterial* aiMat = scene->mMaterials[materialIndex];
+    auto material = make_unique<Material>();
+
+    auto add = [&](Material::Slot slot, const vector<Texture2D*>& maps) {
+        for (const Texture2D* texture : maps) {
+            material->addTexture(slot, texture);
+        }
+        };
+
+    add(Material::Slot::Diffuse,
+        loadMaterialTextures(scene, aiMat, aiTextureType_DIFFUSE, Texture2D::Texture2DType::TextureDiffuse));
+    add(Material::Slot::Specular,
+        loadMaterialTextures(scene, aiMat, aiTextureType_SPECULAR, Texture2D::Texture2DType::TextureSpecular));
+
+    // Normal map heuristic
+    auto normalMaps = loadMaterialTextures(scene, aiMat, aiTextureType_NORMALS, Texture2D::Texture2DType::TextureNormal);
+    if (normalMaps.empty()) {
+        // fallback: Some models use height maps as normal maps
+        normalMaps = loadMaterialTextures(scene, aiMat, aiTextureType_HEIGHT, Texture2D::Texture2DType::TextureNormal);
+    }
+    add(Material::Slot::Normal, normalMaps);
+
+    add(Material::Slot::Height,
+        loadMaterialTextures(scene, aiMat, aiTextureType_DISPLACEMENT, Texture2D::Texture2DType::TextureHeight));
+
+    lookup = static_cast<int32_t>(m_Materials.size());
+    m_Materials.push_back(move(material));
+    return m_Materials.back().get();
 }
 
 vector<Texture2D*> Model::loadMaterialTextures(
@@ -338,7 +441,7 @@ vector<Texture2D*> Model::loadMaterialTextures(
             if (!fullPath.empty() &&
                 fullPath.find(':') == string::npos &&
                 fullPath[0] != '/'
-            ) {
+                ) {
                 fullPath = directory + "/" + texID;
             }
             auto texture = make_unique<Texture2D>(fullPath, true, texType);
@@ -355,11 +458,9 @@ void Model::setVertexBoneDataToDefault(
     std::array<float, MAX_BONE_INFLUENCE>& weights
 )
 {
-    for (int i = 0; i < MAX_BONE_INFLUENCE; i++)
-    {
-        boneIDs[i] = -1;
-        weights[i] = 0.0f;
-    }
+    // -1 means "no bone": the vertex shader skips ids < 0 and falls back to the bind pose.
+    boneIDs.fill(-1);
+    weights.fill(0.0f);
 }
 
 void Model::setVertexBoneData(
@@ -379,42 +480,29 @@ void Model::setVertexBoneData(
 }
 
 void Model::extractBoneWeightForVertices(
+    LoadContext& ctx,
     std::vector<std::array<int, MAX_BONE_INFLUENCE>>& boneIDs,
     std::vector<std::array<float, MAX_BONE_INFLUENCE>>& weights,
-    aiMesh* mesh, const aiScene* scene)
+    aiMesh* mesh)
 {
-    auto& boneInfoMap = m_BoneInfoMap;
-    int& boneCount = m_BoneCounter;
-
     for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
     {
-        const aiBone* aiBone = mesh->mBones[boneIndex];
-        std::string boneName = aiBone->mName.C_Str();
-        int boneID = -1;
+        const aiBone* bone = mesh->mBones[boneIndex];
 
-        auto [it, inserted] = boneInfoMap.try_emplace(
-            boneName,
-            BoneInfo{ boneCount, AssimpGLMHelpers::ConvertMatrixToGLMFormat(aiBone->mOffsetMatrix) }
+        // Slot = index used by the vertex attribute and by the bone matrix array.
+        const int boneID = ctx.rig.addBone(
+            bone->mName.C_Str(),
+            AssimpGLMHelpers::ConvertMatrixToGLMFormat(bone->mOffsetMatrix)
         );
 
-        if (inserted)
-            boneID = boneCount++;
-        else
-            boneID = it->second.id;
-
-        if (aiBone->mNumWeights == 0)
-            continue;
-
-        for (unsigned int weightIndex = 0; weightIndex < aiBone->mNumWeights; ++weightIndex)
+        for (unsigned int weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex)
         {
-            unsigned int vertexId = aiBone->mWeights[weightIndex].mVertexId;
-            float weight = aiBone->mWeights[weightIndex].mWeight;
-
+            const unsigned int vertexId = bone->mWeights[weightIndex].mVertexId;
             if (vertexId >= boneIDs.size()) {
                 continue;
             }
 
-            setVertexBoneData(boneIDs[vertexId], weights[vertexId], boneID, weight);
+            setVertexBoneData(boneIDs[vertexId], weights[vertexId], boneID, bone->mWeights[weightIndex].mWeight);
         }
     }
 }
@@ -469,19 +557,4 @@ void Model::generateArbitraryTangents(
         tangents[i] = t;
         bitangents[i] = b;
     }
-}
-
-int Model::ensureRootBoneInfo()
-{
-    auto it = m_BoneInfoMap.find(m_RootNodeName);
-    if (it != m_BoneInfoMap.end()) {
-        return it->second.id;
-    }
-
-    int id = m_BoneCounter++;
-    m_BoneInfoMap[m_RootNodeName] = BoneInfo{ id, glm::mat4(1.0f) };
-
-	Debug::logWarn("Model::ensureRootBoneInfo: No bones found in the model. Created a root bone with name '" + m_RootNodeName + "' and ID " + std::to_string(id) + ".\n");
-
-    return id;
 }

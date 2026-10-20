@@ -1,5 +1,10 @@
 #include "EngineRenderer.hpp"
 
+#ifdef BUILD_DEBUG
+#include "debug/AnimationDebug.hpp"
+std::unique_ptr<AnimationDebug::Tool> animDebug;
+#endif
+
 void EngineRenderer::onInit() {
 	ScreenQuad::init();
 
@@ -7,7 +12,7 @@ void EngineRenderer::onInit() {
 	renderTexture->addColorAttachment(GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, Texture2D::FilterLinear, false);
 	renderTexture->useDepthRBO();
 
-	shadowMap = new RenderTexture(2048, 2048);
+	shadowMap = new RenderTexture(8192, 8192);
 	shadowMap->useDepthTexture(Texture2D::FilterLinear);
 
 	// Models and their matrices
@@ -40,13 +45,27 @@ void EngineRenderer::onInit() {
 
 	models.push_back(new Model("Resources/Game/models/simple.obj"));
 	glm::mat4 mat6 = glm::mat4(1.0f);
-	mat6 = glm::translate(mat6, glm::vec3(20.0f, 0.0f, 0.0f));
+	mat6 = glm::translate(mat6, glm::vec3(-50.0f, 0.0f, 0.0f));
 	mat6 = glm::scale(mat6, glm::vec3(0.5f));
 	modelMatrices.push_back(mat6);
 
-	mixamoRetarget = new AnimationRetarget("Resources/Game/models/mixamo_retarget.json", AnimationRetarget::Mode::Strict);
-	danceAnimation = new Animation("Resources/Game/models/Happy.fbx", models[1], mixamoRetarget);
-	animator = new Animator(danceAnimation);
+	mixamoRetarget = new AnimationRetarget("Resources/Game/models/mixamo_retarget.json",
+		AnimationRetarget::Mode::Strict);
+	danceAnimation = new Animation("Resources/Game/models/Happy.fbx");
+	animator = new Animator(*models[1]);
+	animator->play(*danceAnimation, mixamoRetarget);
+
+#ifdef BUILD_DEBUG
+	AnimationDebug::Context ctx;
+	ctx.model = models[1];
+	ctx.animation = danceAnimation;
+	ctx.retarget = mixamoRetarget;
+	ctx.staticSource = animator->getStaticSource();
+	ctx.liveAnimator = animator;
+	animDebug = std::make_unique<AnimationDebug::Tool>(ctx);
+#endif
+
+
 
 	// Cube map (skybox)
 	const char* skyboxFaces[6] = {
@@ -103,6 +122,10 @@ void EngineRenderer::onWindowResize() {
 }
 
 void EngineRenderer::onUpdate() {
+#ifdef BUILD_DEBUG
+	if (animDebug) animDebug->drawImGui();
+#endif
+
     camera->setRotation(-((Input::mouse.getMouseY()/Window::height())-0.5f)*180.0f, Input::mouse.getMouseX()*360.0f/Window::width(), 0.0f);
 
 	if (Input::keyboard.isKeyDown(GLFW_KEY_W)) {
@@ -222,7 +245,8 @@ void EngineRenderer::onUpdate() {
 
 	for (int i = 1; i < models.size(); i++) {
 		if (models[i]->getModelFeature() & Model::ModelFeature::Rig) {
-			animator->updateAnimation(shader);
+			animator->update();
+			animator->bind(shader);
 		}
 
 		// Model matrix
