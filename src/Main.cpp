@@ -74,7 +74,7 @@ int main()
 
     // Main loop
     while (!Window::shouldClose()) {
-		Window::poolEvent();
+		Window::pollEvent();
 
         if (Window::resized()) {
             glViewport(0, 0, Window::width(), Window::height());

@@ -49,9 +49,14 @@ void EngineRenderer::onInit() {
 	mat6 = glm::scale(mat6, glm::vec3(0.5f));
 	modelMatrices.push_back(mat6);
 
-	mixamoRetarget = new AnimationRetarget("Resources/Game/models/mixamo_retarget.json",
+	models.push_back(new Model("Resources/Game/models/cc201/cc201_body.obj"));
+	glm::mat4 mat7 = glm::mat4(1.0f);
+	mat7 = glm::translate(mat7, glm::vec3(-30.0f, 1.5f, 0.0f));
+	modelMatrices.push_back(mat7);
+
+	mixamoRetarget = new AnimationRetarget("Resources/Game/animation/retarget/mixamo_to_vrm_retarget.json",
 		AnimationRetarget::Mode::Strict);
-	danceAnimation = new Animation("Resources/Game/models/Happy.fbx");
+	danceAnimation = new Animation("Resources/Game/animation/idle.fbx");
 	animator = new Animator(*models[1]);
 	animator->play(*danceAnimation, mixamoRetarget);
 
@@ -215,8 +220,8 @@ void EngineRenderer::onUpdate() {
 	// Render rest of scene
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	shader.bind();
 

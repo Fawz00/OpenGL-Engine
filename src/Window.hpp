@@ -26,7 +26,7 @@ public:
 	static void enableVsync(bool v);
     static bool isVsync();
     static void toggleFullscreen();
-    static void poolEvent();
+    static void pollEvent();
     static void drawFrame();
     static void loadCursor(GLFWcursor*& cursor, const char* path, int hotspotX, int hotspotY);
 	static void showCursor(bool show);

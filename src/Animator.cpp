@@ -378,15 +378,37 @@ bool Animator::buildBinding(const Animation& animation, const AnimationClip& cli
         }
         };
 
+    // A local transform is only meaningful relative to ITS parent. The animation file's static value may
+    // therefore be used under the model's parent only if both parents are the same node (a driven node may
+    // also have pivot nodes between them, which are folded in below).
+    uint32_t parentMismatchCount = 0;
+    std::string parentMismatchText;
+    auto parentsAgree = [&](int32_t r, int32_t rep, bool throughExtras) {
+        const int32_t rigParent = rig.getNodeParent(r);
+        int32_t p = animNodes[rep].parent;
+        if (throughExtras) {
+            while (p >= 0 && counterpart[p] < 0) p = animNodes[p].parent;
+        }
+        if (rigParent < 0 || p < 0) return rigParent < 0 && p < 0;
+        return counterpart[p] == rigParent;
+        };
+
     for (int32_t r = 0; r < rigNodeCount; ++r) {
         const int32_t a = animOfRig[r];
         const int32_t rep = repOfRig[r];
+        const bool staticIsUsed = rep >= 0 && (channelOfAnim[rep] < 0 || !mapped[rep]);
 
         // Static transform of this node: from the animation file or from the model, see StaticSource.
-        const glm::mat4& staticMatrix = (m_StaticSource == StaticSource::Animation && rep >= 0)
-            ? animNodes[rep].local
-            : rig.getNodeBindLocal(r);
-        if (rep >= 0 && (channelOfAnim[rep] < 0 || !mapped[rep])) compareStatic(r, rep);
+        bool useAnimationValue = (m_StaticSource == StaticSource::Animation && rep >= 0);
+        if (useAnimationValue && staticIsUsed && !parentsAgree(r, rep, a >= 0)) {
+            useAnimationValue = false;
+            if (parentMismatchCount++ < 3) {
+                if (!parentMismatchText.empty()) parentMismatchText += ", ";
+                parentMismatchText += rig.getNodeName(r);
+            }
+        }
+        const glm::mat4& staticMatrix = useAnimationValue ? animNodes[rep].local : rig.getNodeBindLocal(r);
+        if (staticIsUsed) compareStatic(r, rep);
 
         if (a < 0) {
             out.staticLocal[r] = staticMatrix;
@@ -470,29 +492,42 @@ bool Animator::buildBinding(const Animation& animation, const AnimationClip& cli
         return false;
     }
 
-    std::string message = "ANIMATOR: bound clip '" + clip.getName() + "': " + std::to_string(drivenNodes) + "/"
+    // The logger keeps only a short fixed-size message (Debug::LOG_MESSAGE_SIZE), so the report is split into one
+    // short summary line plus one detail line per topic. Every line is capped, so nothing is cut off silently.
+    auto capped = [](std::string text) {
+        constexpr size_t kMaxLineLength = 380;
+        if (text.size() > kMaxLineLength) text = text.substr(0, kMaxLineLength) + "...";
+        return text;
+        };
+
+    const bool warn = unused > 0 || undrivenBones > 0 || staticDiffCount > 0 || parentMismatchCount > 0
+        || collisions > 0 || discardedChains > 0;
+
+    std::string summary = "ANIMATOR: bound clip '" + clip.getName() + "': " + std::to_string(drivenNodes) + "/"
         + std::to_string(rigNodeCount) + " rig nodes animated";
+    if (unused > 0) summary += ", " + std::to_string(unused) + " unused channel(s)";
+    if (undrivenBones > 0) summary += ", " + std::to_string(undrivenBones) + " bone(s) not driven";
+    if (staticDiffCount > 0) summary += ", " + std::to_string(staticDiffCount) + " static transform difference(s)";
+    if (parentMismatchCount > 0) summary += ", " + std::to_string(parentMismatchCount) + " parent mismatch(es)";
+    if (collisions > 0) summary += ", " + std::to_string(collisions) + " mapping collision(s)";
+    if (discardedChains > 0) summary += ", " + std::to_string(discardedChains) + " pivot chain(s) dropped";
+    if (warn) Debug::logWarn(capped(summary));
+    else Debug::log(capped(summary));
+
     if (unused > 0) {
-        message += ", " + std::to_string(unused) + " channel(s) unused (first: " + unusedNames + ")";
+        Debug::logWarn(capped("ANIMATOR:   unused channels (their node is not driven, so the channel is ignored), first: " + unusedNames));
     }
     if (undrivenBones > 0) {
-        message += ", " + std::to_string(undrivenBones) + " bone(s) not driven, staying in bind pose (first: "
-            + undrivenNames + ")";
+        Debug::logWarn(capped("ANIMATOR:   bones not driven by any animation node, they stay in bind pose, first: " + undrivenNames));
     }
     if (staticDiffCount > 0) {
-        message += ", " + std::to_string(staticDiffCount) + " non-animated node(s) have a different static transform in the model"
-            " and in the animation (using the " + (m_StaticSource == StaticSource::Animation ? "animation's" : "model's")
-            + " value; first: " + staticDiffText + ")";
+        Debug::logWarn(capped("ANIMATOR:   non-animated nodes whose static transform differs between model and animation (using the "
+            + std::string(m_StaticSource == StaticSource::Animation ? "animation's" : "model's") + " value), first: " + staticDiffText));
     }
-    if (collisions > 0) {
-        message += ", " + std::to_string(collisions) + " node(s) mapped to an already used rig node";
+    if (parentMismatchCount > 0) {
+        Debug::logWarn(capped("ANIMATOR:   nodes with a different parent in the animation file than in the model (the model's value is used), first: "
+            + parentMismatchText));
     }
-    if (discardedChains > 0) {
-        message += ", " + std::to_string(discardedChains) + " pivot chain(s) dropped (no mapped ancestor)";
-    }
-
-    if (unused > 0 || undrivenBones > 0 || staticDiffCount > 0 || collisions > 0 || discardedChains > 0) Debug::logWarn(message);
-    else Debug::log(message);
 
     return true;
 }

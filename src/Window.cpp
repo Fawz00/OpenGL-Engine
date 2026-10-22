@@ -137,7 +137,7 @@ int Window::width() { return WINDOW_WIDTH; }
 int Window::height() { return WINDOW_HEIGHT; }
 bool Window::isVsync() { return vsync; }
 
-void Window::poolEvent() { glfwPollEvents(); }
+void Window::pollEvent() { glfwPollEvents(); }
 void Window::drawFrame() { if (window) glfwSwapBuffers(window); }
 
 void Window::enableVsync(bool v) {
